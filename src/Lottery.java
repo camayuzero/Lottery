@@ -12,6 +12,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionListener;
 
 import org.w3c.dom.css.RGBColor;
 
@@ -33,6 +34,8 @@ import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+
 import java.awt.ComponentOrientation;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
@@ -45,6 +48,8 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
+import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.DropMode;
 import javax.swing.JScrollPane;
 import javax.swing.AbstractListModel;
@@ -61,7 +66,7 @@ public class Lottery extends JFrame
     private JScrollPane sP_SelectList;
     private JScrollPane sP_Message;
     private JButton btnQuickSelect;
-    private JButton btnConfirm;
+    private JButton btnSelfSelect;
     private JButton btnAward;
     private JButton btnClickMe;
     private JButton btnAskForAward;
@@ -73,13 +78,14 @@ public class Lottery extends JFrame
     private JLabel lblAwardNum05;
     private JLabel lblAwardNum06;
     private JLabel lblAwardNum07;
+    private DefaultListModel dListModel;
     private JList listSelectNumbers;
     private JTextArea tA_Message;
     private JSpinner spinnerSets;
     
     private JButton[] arrayBtn = new JButton[49];
     private HashSet<JButton> hsSelectBtn = new HashSet<>();
-    private LinkedList<Iterator<JButton>> lklSelectHs = new LinkedList<>();
+    private ArrayList<Iterator<JButton>> alSelectNum = new ArrayList<>();
     private JButton btnNewButton_1;
 
     /**
@@ -136,24 +142,37 @@ public class Lottery extends JFrame
         gbc_label_12.gridx = 0;
         gbc_label_12.gridy = 0;
         panel_Operation.add(label_12, gbc_label_12);
-
-        btnQuickSelect = new JButton("\u5FEB\u9078");
-        btnQuickSelect.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-            }
-        });
-        btnQuickSelect.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnQuickSelect.setPreferredSize(new Dimension(130, 40));
-        btnQuickSelect.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        GridBagConstraints gbc_btnQuickSelect = new GridBagConstraints();
-        gbc_btnQuickSelect.gridheight = 2;
-        gbc_btnQuickSelect.fill = GridBagConstraints.BOTH;
-        gbc_btnQuickSelect.insets = new Insets(0, 0, 5, 5);
-        gbc_btnQuickSelect.gridx = 1;
-        gbc_btnQuickSelect.gridy = 0;
-        panel_Operation.add(btnQuickSelect, gbc_btnQuickSelect);
+        
+                btnSelfSelect = new JButton("\u81EA\u9078\u78BA\u8A8D");
+                btnSelfSelect.addActionListener(new ActionListener()
+                {
+                    @Override
+                    public void actionPerformed(ActionEvent e)
+                    {
+                        if (hsSelectBtn.size() < 6)
+                        {
+                            JOptionPane.showMessageDialog(null, "請選擇 6 個號碼", "未完成選號", JOptionPane.INFORMATION_MESSAGE);
+                        } else
+                        {
+                            alSelectNum.add(hsSelectBtn.iterator());
+                            dListModel.addElement(hsSelectBtn.toArray().toString());
+                            listSelectNumbers.setModel(dListModel);
+                            System.out.println(dListModel.firstElement());
+                            System.out.println(listSelectNumbers.getFirstVisibleIndex());
+                            hsSelectBtn.clear();
+                        }
+                    }
+                });
+                btnSelfSelect.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                btnSelfSelect.setPreferredSize(new Dimension(130, 40));
+                btnSelfSelect.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+                GridBagConstraints gbc_btnSelfSelect = new GridBagConstraints();
+                gbc_btnSelfSelect.gridheight = 2;
+                gbc_btnSelfSelect.fill = GridBagConstraints.BOTH;
+                gbc_btnSelfSelect.insets = new Insets(0, 0, 5, 5);
+                gbc_btnSelfSelect.gridx = 1;
+                gbc_btnSelfSelect.gridy = 0;
+                panel_Operation.add(btnSelfSelect, gbc_btnSelfSelect);
 
         JLabel label_13 = new JLabel("");
         label_13.setMinimumSize(new Dimension(30, 30));
@@ -194,18 +213,24 @@ public class Lottery extends JFrame
         gbc_label_6.gridx = 0;
         gbc_label_6.gridy = 3;
         panel_Operation.add(label_6, gbc_label_6);
-
-        JLabel label = new JLabel("\u591A\u7D44");
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        label.setBorder(new LineBorder(Color.BLACK));
-        label.setBackground(Color.GREEN);
-        label.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        GridBagConstraints gbc_label = new GridBagConstraints();
-        gbc_label.fill = GridBagConstraints.HORIZONTAL;
-        gbc_label.insets = new Insets(0, 0, 5, 5);
-        gbc_label.gridx = 1;
-        gbc_label.gridy = 3;
-        panel_Operation.add(label, gbc_label);
+        
+                btnQuickSelect = new JButton("\u5FEB\u9078");
+                btnQuickSelect.addActionListener(new ActionListener()
+                {
+                    public void actionPerformed(ActionEvent e)
+                    {
+                    }
+                });
+                btnQuickSelect.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                btnQuickSelect.setPreferredSize(new Dimension(130, 40));
+                btnQuickSelect.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+                GridBagConstraints gbc_btnQuickSelect = new GridBagConstraints();
+                gbc_btnQuickSelect.gridheight = 2;
+                gbc_btnQuickSelect.fill = GridBagConstraints.BOTH;
+                gbc_btnQuickSelect.insets = new Insets(0, 0, 5, 5);
+                gbc_btnQuickSelect.gridx = 1;
+                gbc_btnQuickSelect.gridy = 3;
+                panel_Operation.add(btnQuickSelect, gbc_btnQuickSelect);
 
         JLabel label_7 = new JLabel("");
         label_7.setMinimumSize(new Dimension(30, 30));
@@ -217,16 +242,6 @@ public class Lottery extends JFrame
         gbc_label_7.gridx = 0;
         gbc_label_7.gridy = 4;
         panel_Operation.add(label_7, gbc_label_7);
-
-        spinnerSets = new JSpinner();
-        spinnerSets.setModel(new SpinnerNumberModel(1, 1, 1000, 1));
-        spinnerSets.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_spinnerSets = new GridBagConstraints();
-        gbc_spinnerSets.fill = GridBagConstraints.HORIZONTAL;
-        gbc_spinnerSets.insets = new Insets(0, 0, 5, 5);
-        gbc_spinnerSets.gridx = 1;
-        gbc_spinnerSets.gridy = 4;
-        panel_Operation.add(spinnerSets, gbc_spinnerSets);
 
         JLabel label_8 = new JLabel("");
         label_8.setMinimumSize(new Dimension(30, 30));
@@ -247,42 +262,18 @@ public class Lottery extends JFrame
         gbc_label_9.gridx = 0;
         gbc_label_9.gridy = 6;
         panel_Operation.add(label_9, gbc_label_9);
-
-        btnConfirm = new JButton("\u78BA\u8A8D\u9078\u865F");
-        btnConfirm.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if (hsSelectBtn.size() < 6)
-                {
-                    JOptionPane.showMessageDialog(null, "請選擇 6 個號碼", "未完成選號", JOptionPane.INFORMATION_MESSAGE);
-                } else
-                {
-                    lklSelectHs.add(hsSelectBtn.iterator());
-//                    listSelectNumbers.setModel(new AbstractListModel() {
-//                        String[] values = new String[] {"1", "2", "12 3 2 4"};
-//                        public int getSize() {
-//                            return values.length;
-//                        }
-//                        public Object getElementAt(int index) {
-//                            return values[index];
-//                        }
-//                    });
-                    hsSelectBtn.clear();
-                }
-            }
-        });
-        btnConfirm.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnConfirm.setPreferredSize(new Dimension(130, 40));
-        btnConfirm.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        GridBagConstraints gbc_btnConfirm = new GridBagConstraints();
-        gbc_btnConfirm.gridheight = 2;
-        gbc_btnConfirm.fill = GridBagConstraints.BOTH;
-        gbc_btnConfirm.insets = new Insets(0, 0, 5, 5);
-        gbc_btnConfirm.gridx = 1;
-        gbc_btnConfirm.gridy = 6;
-        panel_Operation.add(btnConfirm, gbc_btnConfirm);
+        
+                JLabel label = new JLabel("\u591A\u7D44");
+                label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setBorder(new LineBorder(Color.BLACK));
+                label.setBackground(Color.GREEN);
+                label.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+                GridBagConstraints gbc_label = new GridBagConstraints();
+                gbc_label.fill = GridBagConstraints.HORIZONTAL;
+                gbc_label.insets = new Insets(0, 0, 5, 5);
+                gbc_label.gridx = 1;
+                gbc_label.gridy = 6;
+                panel_Operation.add(label, gbc_label);
 
         JLabel label_10 = new JLabel("");
         label_10.setMinimumSize(new Dimension(30, 30));
@@ -293,6 +284,16 @@ public class Lottery extends JFrame
         gbc_label_10.gridx = 0;
         gbc_label_10.gridy = 7;
         panel_Operation.add(label_10, gbc_label_10);
+        
+                spinnerSets = new JSpinner();
+                spinnerSets.setModel(new SpinnerNumberModel(1, 1, 1000, 1));
+                spinnerSets.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+                GridBagConstraints gbc_spinnerSets = new GridBagConstraints();
+                gbc_spinnerSets.fill = GridBagConstraints.HORIZONTAL;
+                gbc_spinnerSets.insets = new Insets(0, 0, 5, 5);
+                gbc_spinnerSets.gridx = 1;
+                gbc_spinnerSets.gridy = 7;
+                panel_Operation.add(spinnerSets, gbc_spinnerSets);
 
         JLabel label_11 = new JLabel("");
         label_11.setMinimumSize(new Dimension(30, 30));
@@ -595,9 +596,20 @@ public class Lottery extends JFrame
         gbc_sP_SelectList.gridy = 2;
         panel_Award.add(sP_SelectList, gbc_sP_SelectList);
 
-        listSelectNumbers = new JList();
-        listSelectNumbers.setFont(new Font("微軟正黑體", Font.PLAIN, 18));
-        listSelectNumbers.setModel(new AbstractListModel() {
+        
+        
+//        AbstractListModel<String> aListModel = new AbstractListModel<>()
+//        {
+//            String[] values = new String[] {};
+//            public int getSize() {
+//                return values.length;
+//            }
+//            public String getElementAt(int index) {
+//                return values[index];
+//            }
+//        };
+        
+        dListModel = new DefaultListModel<>() {
             String[] values = new String[] {};
             public int getSize() {
                 return values.length;
@@ -605,7 +617,13 @@ public class Lottery extends JFrame
             public Object getElementAt(int index) {
                 return values[index];
             }
-        });
+        };
+        
+        listSelectNumbers = new JList(dListModel);
+        listSelectNumbers.setFont(new Font("微軟正黑體", Font.PLAIN, 18));
+//        listSelectNumbers.setModel(dListModel);
+        listSelectNumbers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listSelectNumbers.addListSelectionListener(null);
         sP_SelectList.setViewportView(listSelectNumbers);
         listSelectNumbers.setBorder(new LineBorder(new Color(0, 0, 0), 2));
 
