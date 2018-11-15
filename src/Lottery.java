@@ -89,7 +89,6 @@ public class Lottery extends JFrame
     private JButton[] arrayBtn = new JButton[49];
     private HashSet<JButton> hsSelectBtn = new HashSet<>();
     private ArrayList<Iterator<JButton>> alSelectNum = new ArrayList<>();
-    private JButton btnNewButton_1;
 
     /**
      * Launch the application.
@@ -160,7 +159,6 @@ public class Lottery extends JFrame
                     alSelectNum.add(hsSelectBtn.iterator());    //存入ArrayList
                     dListModel.addElement(SelectNumToString(hsSelectBtn));  //將號碼加入JList
                     SelectBtnClear(hsSelectBtn);    //清除選取的號碼
-                    System.out.println(hsSelectBtn.isEmpty());
                 }
             }
         });
@@ -837,12 +835,6 @@ public class Lottery extends JFrame
         contentPane.add(panel_Number, BorderLayout.CENTER);
         panel_Number.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-        btnNewButton_1 = new JButton("New button");
-        btnNewButton_1.setFont(new Font("新細明體", Font.PLAIN, 45));
-        btnNewButton_1.setBorder(UIManager.getBorder("Tree.editorBorder"));
-        btnNewButton_1.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        panel_Number.add(btnNewButton_1);
-
         for (int i = 1; i <= 49; i++)
         {            
             arrayBtn[i - 1] = CreateBtnNum(i);
@@ -897,21 +889,29 @@ public class Lottery extends JFrame
     }
     
     //將選擇的號碼排序並轉為字串
-    private String SelectNumToString(Iterable iterable) {
-        ArrayList<Integer> numbers = new ArrayList<>();   
-        try {
-            for(Object o : iterable) {
-                numbers.add(Integer.parseInt(((JButton)o).getName()));
-            }            
-        }catch(Exception e) {
-            JOptionPane.showMessageDialog(null, "意外錯誤", "Error", ERROR);
-            System.out.println(e);
+    private String SelectNumToString(HashSet hashSet) {
+        String numbers ;
+        for(int i = 0;i<hashSet.size();i++) {
+            
         }
+        
+//        ArrayList<Integer> numbers = new ArrayList<>();   
+//        try {
+//            for(Object o : iterable) {
+//                numbers.add(Integer.parseInt(((JButton)o).getName()));
+//            }            
+//        }catch(Exception e) {
+//            JOptionPane.showMessageDialog(null, "意外錯誤", "Error", ERROR);
+//            System.out.println(e);
+//        }
         numbers.sort(null);
-        return numbers.toString();
+        String[] nums = null;
+        numbers.toArray(nums);
+        System.out.println(nums);
+        return nums.toString();
     }
     
-    //模擬再點一次來清除選取的按鈕
+    //清除選取的按鈕
     private void SelectBtnClear(Iterable iterable) {
         for(Object o : iterable) {
             RevertSelectBtnColor(((JButton)o));
