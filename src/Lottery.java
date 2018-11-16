@@ -1,61 +1,37 @@
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.GridLayout;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ListSelectionListener;
-
-import org.w3c.dom.css.RGBColor;
-
-import javax.swing.border.EtchedBorder;
 import java.awt.Color;
-import javax.swing.UIManager;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.io.Console;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.awt.event.ActionEvent;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 
-import java.awt.ComponentOrientation;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.CompoundBorder;
-import java.awt.Rectangle;
-import javax.swing.JTable;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.DropMode;
 import javax.swing.JScrollPane;
-import javax.swing.AbstractListModel;
 import javax.swing.JProgressBar;
 
 public class Lottery extends JFrame
@@ -86,9 +62,10 @@ public class Lottery extends JFrame
     private JTextArea tA_Message;
     private JSpinner spinnerSets;
 
-    private JButton[] arrayBtn = new JButton[49];
-    private HashSet<JButton> hsSelectBtn = new HashSet<>();
-    private ArrayList<Iterator<JButton>> alSelectNum = new ArrayList<>();
+    private JButton[] arrayBtn = new JButton[49];   //儲存動態產生的號碼btn的陣列
+    private HashSet<JButton> hsMySelectBtn = new HashSet<>(); //暫時儲存自選的btn
+    private ArrayList<Iterator<JButton>> alSelectNum = new ArrayList<>();   //儲存每個選擇的號碼組。對獎用
+    private int setsCount = 0;  //選號組數計數器
 
     /**
      * Launch the application.
@@ -111,6 +88,79 @@ public class Lottery extends JFrame
         });
     }
 
+    //動態產生號碼按鈕
+    private JButton CreateBtnNum(int i)
+    {
+        JButton btnNewButton = new JButton(String.format("%02d", i));
+        btnNewButton.setName(String.valueOf(i));
+        btnNewButton.setMargin(new Insets(20, 20, 20, 20));
+        btnNewButton.setPreferredSize(new Dimension(95, 50));
+        btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        btnNewButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btnNewButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+        btnNewButton.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                if ((hsMySelectBtn.size() < 6) && (true == hsMySelectBtn.add(btnNewButton)))
+                {
+                    ChangeSelectBtnColor(btnNewButton);                    
+                } else
+                {
+                    RevertSelectBtnColor(btnNewButton);
+                    hsMySelectBtn.remove(btnNewButton);                  
+                }
+            }
+        });
+        return btnNewButton;
+    }
+    
+    //變更按鈕顏色及外觀
+    private void ChangeSelectBtnColor(JButton jbtn) {
+        jbtn.setForeground(Color.RED);
+        jbtn.setBorder(
+                new BevelBorder(BevelBorder.LOWERED, Color.RED, Color.RED, Color.RED, Color.RED));
+//      btnNewButton.setBackground(Color.PINK);                   
+//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
+    }
+    
+    //恢復按鈕顏色及外觀
+    private void RevertSelectBtnColor(JButton jbtn) {
+        jbtn.setForeground(Color.BLACK);
+        jbtn.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+//      btnNewButton.setBackground(new Color(240,240,240));  
+//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));  
+    }
+    
+    //將選擇的號碼排序並轉為字串
+    private String SelectNumToString(Iterable iterable) {
+        String strNumbers = "第" + (++setsCount) + "組:";
+        //取得號碼陣列
+        ArrayList<Integer> numbers = new ArrayList<>();   
+        try {
+            for(Object o : iterable) {
+                numbers.add(Integer.parseInt(((JButton)o).getName()));
+            }        
+            numbers.sort(null);
+            //取出號碼組成字串
+            for(int i : numbers) {
+                strNumbers += " " + i ;
+            }
+        }catch(Exception e) {
+            JOptionPane.showMessageDialog(null, "意外錯誤。無法將選擇的號碼排序並轉為字串。", "Error", ERROR);
+            System.out.println(e);
+        }        
+        return strNumbers;        
+    }
+    
+    //清除選取的按鈕
+    private void SelectBtnClear(Iterable iterable) {
+        for(Object o : iterable) {
+            RevertSelectBtnColor(((JButton)o));
+        }
+        ((HashSet)iterable).clear();
+    }
     /**
      * Create the frame.
      */
@@ -151,14 +201,14 @@ public class Lottery extends JFrame
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                if (hsSelectBtn.size() < 6)
+                if (hsMySelectBtn.size() < 6)
                 {
                     JOptionPane.showMessageDialog(null, "請選擇 6 個號碼", "未完成選號", JOptionPane.INFORMATION_MESSAGE);
                 } else
                 {
-                    alSelectNum.add(hsSelectBtn.iterator());    //存入ArrayList
-                    dListModel.addElement(SelectNumToString(hsSelectBtn));  //將號碼加入JList
-                    SelectBtnClear(hsSelectBtn);    //清除選取的號碼
+                    alSelectNum.add(hsMySelectBtn.iterator());    //存入ArrayList
+                    dListModel.addElement(SelectNumToString(hsMySelectBtn));  //將號碼加入JList
+                    SelectBtnClear(hsMySelectBtn);    //清除選取的號碼
                 }
             }
         });
@@ -843,80 +893,5 @@ public class Lottery extends JFrame
 
     }
 
-    //動態產生號碼按鈕
-    private JButton CreateBtnNum(int i)
-    {
-        JButton btnNewButton = new JButton(String.format("%02d", i));
-        btnNewButton.setName(String.valueOf(i));
-        btnNewButton.setMargin(new Insets(20, 20, 20, 20));
-        btnNewButton.setPreferredSize(new Dimension(95, 50));
-        btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));
-        btnNewButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnNewButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-        btnNewButton.addActionListener(new ActionListener()
-        {
-            @Override
-            public void actionPerformed(ActionEvent e)
-            {
-                if ((hsSelectBtn.size() < 6) && (true == hsSelectBtn.add(btnNewButton)))
-                {
-                    ChangeSelectBtnColor(btnNewButton);                    
-                } else
-                {
-                    RevertSelectBtnColor(btnNewButton);
-                    hsSelectBtn.remove(btnNewButton);                  
-                }
-            }
-        });
-        return btnNewButton;
-    }
-    
-    //變更按鈕顏色及外觀
-    private void ChangeSelectBtnColor(JButton jbtn) {
-        jbtn.setForeground(Color.RED);
-        jbtn.setBorder(
-                new BevelBorder(BevelBorder.LOWERED, Color.RED, Color.RED, Color.RED, Color.RED));
-//      btnNewButton.setBackground(Color.PINK);                   
-//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
-    }
-    
-    //恢復按鈕顏色及外觀
-    private void RevertSelectBtnColor(JButton jbtn) {
-        jbtn.setForeground(Color.BLACK);
-        jbtn.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-//      btnNewButton.setBackground(new Color(240,240,240));  
-//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));  
-    }
-    
-    //將選擇的號碼排序並轉為字串
-    private String SelectNumToString(HashSet hashSet) {
-        String numbers ;
-        for(int i = 0;i<hashSet.size();i++) {
-            
-        }
-        
-//        ArrayList<Integer> numbers = new ArrayList<>();   
-//        try {
-//            for(Object o : iterable) {
-//                numbers.add(Integer.parseInt(((JButton)o).getName()));
-//            }            
-//        }catch(Exception e) {
-//            JOptionPane.showMessageDialog(null, "意外錯誤", "Error", ERROR);
-//            System.out.println(e);
-//        }
-        numbers.sort(null);
-        String[] nums = null;
-        numbers.toArray(nums);
-        System.out.println(nums);
-        return nums.toString();
-    }
-    
-    //清除選取的按鈕
-    private void SelectBtnClear(Iterable iterable) {
-        for(Object o : iterable) {
-            RevertSelectBtnColor(((JButton)o));
-        }
-        ((HashSet)iterable).clear();
-    }
 
 }
