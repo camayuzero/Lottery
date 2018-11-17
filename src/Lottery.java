@@ -36,6 +36,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.JScrollPane;
 import javax.swing.JProgressBar;
 import javax.swing.JCheckBox;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.lang.reflect.AnnotatedWildcardType;
 
 public class Lottery extends JFrame
 {
@@ -52,6 +57,7 @@ public class Lottery extends JFrame
     private JButton btnAward;
     private JButton btnClickMe;
     private JButton btnAskForAward;
+    private JButton btnAgain;
     private JLabel lblImageClick;
     private JLabel lblAwardNum01;
     private JLabel lblAwardNum02;
@@ -75,7 +81,9 @@ public class Lottery extends JFrame
     private ArrayList<HashSet<JButton>> alSelectNum = new ArrayList<>(); // 儲存每個選擇的號碼組。超級獎號抽取用。
     private int setsCount = 0; // 選號組數計數器
     private Random random = new Random(); // 亂數產生器
-    private int chargeLevel = 4; // 充能計數器
+    private int chargeLevel = 0; // 充能計數器
+    private String[] arraySelectJListElement = new String[7]; // 我的選號清單元素轉為陣列使用
+    private Boolean drawLottery = false;
 
     /**
      * Launch the application.
@@ -257,7 +265,7 @@ public class Lottery extends JFrame
         gbc_btnQuickSelect.fill = GridBagConstraints.BOTH;
         gbc_btnQuickSelect.insets = new Insets(0, 0, 5, 5);
         gbc_btnQuickSelect.gridx = 1;
-        gbc_btnQuickSelect.gridy = 3;
+        gbc_btnQuickSelect.gridy = 2;
         panel_Operation.add(btnQuickSelect, gbc_btnQuickSelect);
 
         JLabel label_7 = new JLabel("");
@@ -281,6 +289,16 @@ public class Lottery extends JFrame
         gbc_label_8.gridy = 5;
         panel_Operation.add(label_8, gbc_label_8);
 
+        cbTheSameQuickSelect = new JCheckBox("\u540C\u865F\u5FEB\u9078");
+        cbTheSameQuickSelect.setFocusPainted(false);
+        cbTheSameQuickSelect.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+        GridBagConstraints gbc_cbTheSameQuickSelect = new GridBagConstraints();
+        gbc_cbTheSameQuickSelect.anchor = GridBagConstraints.SOUTHWEST;
+        gbc_cbTheSameQuickSelect.insets = new Insets(0, 0, 5, 5);
+        gbc_cbTheSameQuickSelect.gridx = 1;
+        gbc_cbTheSameQuickSelect.gridy = 5;
+        panel_Operation.add(cbTheSameQuickSelect, gbc_cbTheSameQuickSelect);
+
         JLabel label_9 = new JLabel("");
         label_9.setMinimumSize(new Dimension(30, 30));
         label_9.setPreferredSize(new Dimension(30, 30));
@@ -290,26 +308,6 @@ public class Lottery extends JFrame
         gbc_label_9.gridx = 0;
         gbc_label_9.gridy = 6;
         panel_Operation.add(label_9, gbc_label_9);
-
-        cbTheSameQuickSelect = new JCheckBox("\u540C\u865F\u5FEB\u9078");
-        cbTheSameQuickSelect.setFocusPainted(false);
-        cbTheSameQuickSelect.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
-        GridBagConstraints gbc_cbTheSameQuickSelect = new GridBagConstraints();
-        gbc_cbTheSameQuickSelect.anchor = GridBagConstraints.SOUTHWEST;
-        gbc_cbTheSameQuickSelect.insets = new Insets(0, 0, 5, 5);
-        gbc_cbTheSameQuickSelect.gridx = 1;
-        gbc_cbTheSameQuickSelect.gridy = 6;
-        panel_Operation.add(cbTheSameQuickSelect, gbc_cbTheSameQuickSelect);
-
-        JLabel label_10 = new JLabel("");
-        label_10.setMinimumSize(new Dimension(30, 30));
-        label_10.setPreferredSize(new Dimension(30, 30));
-        label_10.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_10 = new GridBagConstraints();
-        gbc_label_10.insets = new Insets(0, 0, 5, 5);
-        gbc_label_10.gridx = 0;
-        gbc_label_10.gridy = 7;
-        panel_Operation.add(label_10, gbc_label_10);
 
         JLabel label = new JLabel("\u591A\u7D44");
         label.setOpaque(true);
@@ -321,8 +319,28 @@ public class Lottery extends JFrame
         gbc_label.fill = GridBagConstraints.HORIZONTAL;
         gbc_label.insets = new Insets(0, 0, 5, 5);
         gbc_label.gridx = 1;
-        gbc_label.gridy = 7;
+        gbc_label.gridy = 6;
         panel_Operation.add(label, gbc_label);
+
+        JLabel label_10 = new JLabel("");
+        label_10.setMinimumSize(new Dimension(30, 30));
+        label_10.setPreferredSize(new Dimension(30, 30));
+        label_10.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_10 = new GridBagConstraints();
+        gbc_label_10.insets = new Insets(0, 0, 5, 5);
+        gbc_label_10.gridx = 0;
+        gbc_label_10.gridy = 7;
+        panel_Operation.add(label_10, gbc_label_10);
+
+        spinnerSets = new JSpinner();
+        spinnerSets.setModel(new SpinnerNumberModel(1, 1, 1000, 1));
+        spinnerSets.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_spinnerSets = new GridBagConstraints();
+        gbc_spinnerSets.fill = GridBagConstraints.HORIZONTAL;
+        gbc_spinnerSets.insets = new Insets(0, 0, 5, 5);
+        gbc_spinnerSets.gridx = 1;
+        gbc_spinnerSets.gridy = 7;
+        panel_Operation.add(spinnerSets, gbc_spinnerSets);
 
         JLabel label_11 = new JLabel("");
         label_11.setMinimumSize(new Dimension(30, 30));
@@ -334,15 +352,34 @@ public class Lottery extends JFrame
         gbc_label_11.gridy = 8;
         panel_Operation.add(label_11, gbc_label_11);
 
-        spinnerSets = new JSpinner();
-        spinnerSets.setModel(new SpinnerNumberModel(1, 1, 1000, 1));
-        spinnerSets.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_spinnerSets = new GridBagConstraints();
-        gbc_spinnerSets.fill = GridBagConstraints.HORIZONTAL;
-        gbc_spinnerSets.insets = new Insets(0, 0, 5, 5);
-        gbc_spinnerSets.gridx = 1;
-        gbc_spinnerSets.gridy = 8;
-        panel_Operation.add(spinnerSets, gbc_spinnerSets);
+        btnAgain = new JButton("\u518D\u73A9\u4E00\u6B21");
+        btnAgain.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                SetEnabledToTrue();
+            }
+        });
+        btnAgain.setPreferredSize(new Dimension(130, 40));
+        btnAgain.setFont(new Font("微軟正黑體", Font.BOLD, 20));
+        btnAgain.setFocusPainted(false);
+        GridBagConstraints gbc_btnAgain = new GridBagConstraints();
+        gbc_btnAgain.gridheight = 2;
+        gbc_btnAgain.fill = GridBagConstraints.BOTH;
+        gbc_btnAgain.insets = new Insets(0, 0, 5, 5);
+        gbc_btnAgain.gridx = 1;
+        gbc_btnAgain.gridy = 8;
+        panel_Operation.add(btnAgain, gbc_btnAgain);
+
+        JLabel label_31 = new JLabel("");
+        label_31.setPreferredSize(new Dimension(30, 30));
+        label_31.setMinimumSize(new Dimension(30, 30));
+        label_31.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_31 = new GridBagConstraints();
+        gbc_label_31.insets = new Insets(0, 0, 0, 5);
+        gbc_label_31.gridx = 0;
+        gbc_label_31.gridy = 9;
+        panel_Operation.add(label_31, gbc_label_31);
 
         panel_Award = new JPanel();
         panel_Award.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -412,6 +449,8 @@ public class Lottery extends JFrame
         panel_Award.add(label_1, gbc_label_1);
 
         JLabel lblMyNum01 = new JLabel("");
+        lblMyNum01.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblMyNum01.setHorizontalAlignment(SwingConstants.CENTER);
         lblMyNum01.setOpaque(true);
         lblMyNum01.setMinimumSize(new Dimension(50, 50));
         lblMyNum01.setPreferredSize(new Dimension(50, 50));
@@ -427,6 +466,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblMyNum01, gbc_lblMyNum01);
 
         JLabel lblMyNum02 = new JLabel("");
+        lblMyNum02.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblMyNum02.setHorizontalAlignment(SwingConstants.CENTER);
         lblMyNum02.setOpaque(true);
         lblMyNum02.setPreferredSize(new Dimension(50, 50));
         lblMyNum02.setMinimumSize(new Dimension(50, 50));
@@ -442,6 +483,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblMyNum02, gbc_lblMyNum02);
 
         JLabel lblMyNum03 = new JLabel("");
+        lblMyNum03.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblMyNum03.setHorizontalAlignment(SwingConstants.CENTER);
         lblMyNum03.setOpaque(true);
         lblMyNum03.setPreferredSize(new Dimension(50, 50));
         lblMyNum03.setMinimumSize(new Dimension(50, 50));
@@ -457,6 +500,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblMyNum03, gbc_lblMyNum03);
 
         JLabel lblMyNum04 = new JLabel("");
+        lblMyNum04.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblMyNum04.setHorizontalAlignment(SwingConstants.CENTER);
         lblMyNum04.setOpaque(true);
         lblMyNum04.setPreferredSize(new Dimension(50, 50));
         lblMyNum04.setMinimumSize(new Dimension(50, 50));
@@ -472,6 +517,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblMyNum04, gbc_lblMyNum04);
 
         JLabel lblMyNum05 = new JLabel("");
+        lblMyNum05.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblMyNum05.setHorizontalAlignment(SwingConstants.CENTER);
         lblMyNum05.setOpaque(true);
         lblMyNum05.setPreferredSize(new Dimension(50, 50));
         lblMyNum05.setMinimumSize(new Dimension(50, 50));
@@ -487,6 +534,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblMyNum05, gbc_lblMyNum05);
 
         JLabel lblMyNum06 = new JLabel("");
+        lblMyNum06.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblMyNum06.setHorizontalAlignment(SwingConstants.CENTER);
         lblMyNum06.setOpaque(true);
         lblMyNum06.setPreferredSize(new Dimension(50, 50));
         lblMyNum06.setMinimumSize(new Dimension(50, 50));
@@ -506,6 +555,7 @@ public class Lottery extends JFrame
         {
             public void actionPerformed(ActionEvent e)
             {
+                drawLottery = true;
                 switch (chargeLevel)
                 {
                 case 1:
@@ -537,6 +587,8 @@ public class Lottery extends JFrame
                 {
                     arrayAwardNums[i].setText(String.valueOf(numbers.toArray()[i]));
                 }
+
+                SetEnabledToFalse();
             }
         });
         btnAward.setFocusPainted(false);
@@ -687,6 +739,30 @@ public class Lottery extends JFrame
         // 建立模組DefaultListModel，並在JList初始化時作為其參數模組
         dListModel = new DefaultListModel<>();
         listSelectNumbers = new JList(dListModel);
+        listSelectNumbers.addListSelectionListener(new ListSelectionListener()
+        {
+            public void valueChanged(ListSelectionEvent e)
+            {
+                // 每次選擇，getValueIsAdjusting()都會傳回 true (選擇開始) 與 false (選擇結束)
+                // ，一般使用最後的回傳值，故要使用的狀態為false。
+                if (!e.getValueIsAdjusting())
+                {
+                    //有選到元素
+                    if(!listSelectNumbers.isSelectionEmpty()) {
+                        arraySelectJListElement = ((String) listSelectNumbers.getSelectedValue()).split(" ");
+                        for (int i = 1; i < arraySelectJListElement.length; i++)
+                        {
+                            arrayMyNums[i - 1].setText(arraySelectJListElement[i]);
+                        }
+                        // 若已開獎才進行獎號比對判斷
+                        if (drawLottery)
+                        {
+                            JListAward();
+                        }
+                    }                    
+                }
+            }
+        });
         listSelectNumbers.setFont(new Font("微軟正黑體", Font.PLAIN, 18));
         listSelectNumbers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         sP_SelectList.setViewportView(listSelectNumbers);
@@ -715,6 +791,8 @@ public class Lottery extends JFrame
         panel_Award.add(label_2, gbc_label_2);
 
         lblAwardNum01 = new JLabel("");
+        lblAwardNum01.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum01.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum01.setOpaque(true);
         lblAwardNum01.setPreferredSize(new Dimension(50, 50));
         lblAwardNum01.setMinimumSize(new Dimension(50, 50));
@@ -730,6 +808,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblAwardNum01, gbc_lblAwardNum01);
 
         lblAwardNum02 = new JLabel("");
+        lblAwardNum02.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum02.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum02.setOpaque(true);
         lblAwardNum02.setPreferredSize(new Dimension(50, 50));
         lblAwardNum02.setMinimumSize(new Dimension(50, 50));
@@ -745,6 +825,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblAwardNum02, gbc_lblAwardNum02);
 
         lblAwardNum03 = new JLabel("");
+        lblAwardNum03.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum03.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum03.setOpaque(true);
         lblAwardNum03.setPreferredSize(new Dimension(50, 50));
         lblAwardNum03.setMinimumSize(new Dimension(50, 50));
@@ -760,6 +842,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblAwardNum03, gbc_lblAwardNum03);
 
         lblAwardNum04 = new JLabel("");
+        lblAwardNum04.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum04.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum04.setOpaque(true);
         lblAwardNum04.setPreferredSize(new Dimension(50, 50));
         lblAwardNum04.setMinimumSize(new Dimension(50, 50));
@@ -775,6 +859,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblAwardNum04, gbc_lblAwardNum04);
 
         lblAwardNum05 = new JLabel("");
+        lblAwardNum05.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum05.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum05.setOpaque(true);
         lblAwardNum05.setPreferredSize(new Dimension(50, 50));
         lblAwardNum05.setMinimumSize(new Dimension(50, 50));
@@ -790,6 +876,8 @@ public class Lottery extends JFrame
         panel_Award.add(lblAwardNum05, gbc_lblAwardNum05);
 
         lblAwardNum06 = new JLabel("");
+        lblAwardNum06.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum06.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum06.setOpaque(true);
         lblAwardNum06.setPreferredSize(new Dimension(50, 50));
         lblAwardNum06.setMinimumSize(new Dimension(50, 50));
@@ -817,6 +905,8 @@ public class Lottery extends JFrame
         panel_Award.add(label_28, gbc_label_28);
 
         lblAwardNum07 = new JLabel("");
+        lblAwardNum07.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblAwardNum07.setHorizontalAlignment(SwingConstants.CENTER);
         lblAwardNum07.setOpaque(true);
         lblAwardNum07.setPreferredSize(new Dimension(50, 50));
         lblAwardNum07.setMinimumSize(new Dimension(50, 50));
@@ -937,6 +1027,47 @@ public class Lottery extends JFrame
 
     }
 
+    // 重新開始
+    protected void SetEnabledToTrue()
+    {
+        btnAward.setEnabled(true);
+        btnSelfSelect.setEnabled(true);
+        btnQuickSelect.setEnabled(true);
+        for (JButton j : arrayBtn)
+        {
+            j.setEnabled(true);
+        }
+//        listSelectNumbers.clearSelection();
+//        arraySelectJListElement = new String[7];
+        dListModel.removeAllElements();
+        hsMySelectBtn.clear();
+        hsQuickSelectBtn.clear();
+        hsAwardBtn.clear();
+        alSelectNum.clear();
+        setsCount = 0;
+        chargeLevel = 0;
+        drawLottery = false;
+        for(JLabel j : arrayMyNums) {
+            j.setText("");
+        }
+        for(JLabel j : arrayAwardNums) {
+            j.setText("");
+        }       
+        ChangeAllLblBorderToWhite();
+    }
+
+    // 設定btn無法點擊
+    protected void SetEnabledToFalse()
+    {
+        btnAward.setEnabled(false);
+        btnSelfSelect.setEnabled(false);
+        btnQuickSelect.setEnabled(false);
+        for (JButton j : arrayBtn)
+        {
+            j.setEnabled(false);
+        }
+    }
+
     // 動態產生號碼按鈕
     protected JButton CreateBtnNum(int i)
     {
@@ -955,33 +1086,15 @@ public class Lottery extends JFrame
             {
                 if ((hsMySelectBtn.size() < 6) && (true == hsMySelectBtn.add(btnNewButton)))
                 {
-                    ChangeSelectBtnColor(btnNewButton);
+                    ChangeBtnBorderToRed(btnNewButton);
                 } else
                 {
-                    RevertSelectBtnColor(btnNewButton);
+                    ChangeBtnBorderToNull(btnNewButton);
                     hsMySelectBtn.remove(btnNewButton);
                 }
             }
         });
         return btnNewButton;
-    }
-
-    // 變更按鈕顏色及外觀
-    protected void ChangeSelectBtnColor(JButton jbtn)
-    {
-        jbtn.setForeground(Color.RED);
-        jbtn.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.RED, Color.RED, Color.RED, Color.RED));
-//      btnNewButton.setBackground(Color.PINK);                   
-//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
-    }
-
-    // 恢復按鈕顏色及外觀
-    protected void RevertSelectBtnColor(JButton jbtn)
-    {
-        jbtn.setForeground(Color.BLACK);
-        jbtn.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
-//      btnNewButton.setBackground(new Color(240,240,240));  
-//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));  
     }
 
     // 將選擇的號碼排序並轉為整數ArrayList
@@ -1014,7 +1127,7 @@ public class Lottery extends JFrame
     {
         for (Object o : iterable)
         {
-            RevertSelectBtnColor(((JButton) o));
+            ChangeBtnBorderToNull(((JButton) o));
         }
         ((HashSet) iterable).clear();
     }
@@ -1051,6 +1164,113 @@ public class Lottery extends JFrame
         } while (isHave);
 
         return Integer.valueOf(specialNum.getName());
+    }
+
+    // SelectJList的號碼比對
+    protected void JListAward()
+    {
+        ChangeAllLblBorderToWhite();
+
+        for (int i = 0; i < arrayAwardNums.length; i++)
+        {
+            if (!arrayAwardNums[i].getText().isEmpty())
+            {
+                for (JLabel j2 : arrayMyNums)
+                {
+                    if (!j2.getText().isEmpty())
+                    {
+                        if (j2.getText().equals(arrayAwardNums[i].getText()))
+                        {
+                            if (i == arrayAwardNums.length - 1)
+                            {
+                                ChangeLblColorToOrange(arrayAwardNums[i], j2); // 對中特別號
+                            } else
+                            {
+                                ChangeLblColorToGreen(arrayAwardNums[i], j2); // 對中其他號碼
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 變更Label外觀顏色:預設值
+    protected void ChangeAllLblBorderToWhite()
+    {
+        for (JLabel j1 : arrayAwardNums)
+        {
+            j1.setForeground(Color.black);
+            j1.setBackground(Color.white);
+        }
+        for (JLabel j2 : arrayMyNums)
+        {
+            j2.setForeground(Color.black);
+            j2.setBackground(Color.white);
+        }
+    }
+
+    // 變更Label外觀顏色:綠色
+    protected void ChangeLblColorToGreen(JLabel j1, JLabel j2)
+    {
+        j1.setForeground(Color.red);
+        j1.setBackground(new Color(153, 255, 51));
+        j2.setForeground(Color.red);
+        j2.setBackground(new Color(153, 255, 51));
+    }
+    
+ // 變更Label外觀顏色:青色
+    protected void ChangeLblColorToCYAN(JLabel j1, JLabel j2)
+    {
+        j1.setForeground(Color.red);
+        j1.setBackground(Color.CYAN);
+        j2.setForeground(Color.red);
+        j2.setBackground(Color.CYAN);
+    }
+    
+ // 變更Label外觀顏色:洋紅色
+    protected void ChangeLblColorToMAGENTA(JLabel j1, JLabel j2)
+    {
+        j1.setForeground(Color.red);
+        j1.setBackground(Color.MAGENTA);
+        j2.setForeground(Color.red);
+        j2.setBackground(Color.MAGENTA);
+    }
+    
+ // 變更Label外觀顏色:綠色
+    protected void ChangeLblColorToRainbow(JLabel j1, JLabel j2)
+    {
+        j1.setForeground(Color.red);
+        j1.setBackground(Color.yellow);
+        j2.setForeground(Color.red);
+        j2.setBackground(Color.yellow);
+    }
+
+    // 變更Label外觀顏色:橘色。
+    protected void ChangeLblColorToOrange(JLabel j1, JLabel j2)
+    {
+        j1.setForeground(Color.black);
+        j1.setBackground(Color.ORANGE);
+        j2.setForeground(Color.black);
+        j2.setBackground(Color.ORANGE);
+    }
+
+    // 變更按鈕外觀顏色:紅色
+    protected void ChangeBtnBorderToRed(JButton jbtn)
+    {
+        jbtn.setForeground(Color.RED);
+        jbtn.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.RED, Color.RED, Color.RED, Color.RED));
+//      btnNewButton.setBackground(Color.PINK);                   
+//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
+    }
+
+    // 變更按鈕外觀顏色:無
+    protected void ChangeBtnBorderToNull(JButton jbtn)
+    {
+        jbtn.setForeground(Color.BLACK);
+        jbtn.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+//      btnNewButton.setBackground(new Color(240,240,240));  
+//      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));  
     }
 
 }
