@@ -7,11 +7,15 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
+import java.awt.Image;
+
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -19,10 +23,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.TreeMap;
 import java.awt.event.ActionEvent;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
+import javax.imageio.ImageIO;
 import javax.swing.DefaultListModel;
 
 import javax.swing.border.BevelBorder;
@@ -40,7 +46,16 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.AnnotatedWildcardType;
+import javax.swing.ImageIcon;
+import java.awt.Point;
+import java.awt.Component;
+import java.awt.Rectangle;
 
 public class Lottery extends JFrame
 {
@@ -66,6 +81,7 @@ public class Lottery extends JFrame
     private JLabel lblAwardNum05;
     private JLabel lblAwardNum06;
     private JLabel lblAwardNum07;
+    private JLabel lblLotteryImage;
     private DefaultListModel<Object> dListModel;
     private JList listSelectNumbers;
     private JTextArea tA_Message;
@@ -81,9 +97,12 @@ public class Lottery extends JFrame
     private ArrayList<HashSet<JButton>> alSelectNum = new ArrayList<>(); // 儲存每個選擇的號碼組。超級獎號抽取用。
     private int setsCount = 0; // 選號組數計數器
     private Random random = new Random(); // 亂數產生器
-    private int chargeLevel = 0; // 充能計數器
+    private int chargeLevel = 2; // 充能計數器
     private String[] arraySelectJListElement = new String[7]; // 我的選號清單元素轉為陣列使用
-    private Boolean drawLottery = false;
+    private JButton specialNum; // 特別號    
+    private Boolean drawLottery = false; // 是否已開獎
+    private TreeMap<Integer, Integer> treemapIndexLevel = new TreeMap<>();  //儲存各組中獎狀態
+    private int askForAwardCount = 0;   //要獎金次數計數器
 
     /**
      * Launch the application.
@@ -357,7 +376,7 @@ public class Lottery extends JFrame
         {
             public void actionPerformed(ActionEvent e)
             {
-                SetEnabledToTrue();
+                SetEnabledToTrue(); // 開啟btn功能，並清除先前資料
             }
         });
         btnAgain.setPreferredSize(new Dimension(130, 40));
@@ -588,7 +607,8 @@ public class Lottery extends JFrame
                     arrayAwardNums[i].setText(String.valueOf(numbers.toArray()[i]));
                 }
 
-                SetEnabledToFalse();
+                SetEnabledToFalse(); // 關閉btn功能
+                CreateAwardList(); // 產生中獎清單
             }
         });
         btnAward.setFocusPainted(false);
@@ -747,9 +767,10 @@ public class Lottery extends JFrame
                 // ，一般使用最後的回傳值，故要使用的狀態為false。
                 if (!e.getValueIsAdjusting())
                 {
-                    //有選到元素
-                    if(!listSelectNumbers.isSelectionEmpty()) {
-                        arraySelectJListElement = ((String) listSelectNumbers.getSelectedValue()).split(" ");
+                    // 有選到元素
+                    if (!listSelectNumbers.isSelectionEmpty())
+                    {
+                        arraySelectJListElement = ((String) listSelectNumbers.getSelectedValue()).split(" ");// 將選到的元素字串分割成陣列
                         for (int i = 1; i < arraySelectJListElement.length; i++)
                         {
                             arrayMyNums[i - 1].setText(arraySelectJListElement[i]);
@@ -757,9 +778,9 @@ public class Lottery extends JFrame
                         // 若已開獎才進行獎號比對判斷
                         if (drawLottery)
                         {
-                            JListAward();
+                            JListAward(listSelectNumbers.getSelectedIndex());
                         }
-                    }                    
+                    }
                 }
             }
         });
@@ -957,7 +978,7 @@ public class Lottery extends JFrame
         tA_Message = new JTextArea();
         tA_Message.setMinimumSize(new Dimension(1, 1));
         sP_Message.setViewportView(tA_Message);
-        tA_Message.setFont(new Font("微軟正黑體", Font.PLAIN, 18));
+        tA_Message.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
         tA_Message.setEditable(false);
 
         JLabel label_20 = new JLabel("");
@@ -981,14 +1002,28 @@ public class Lottery extends JFrame
         panel_Award.add(label_21, gbc_label_21);
 
         btnAskForAward = new JButton("\u8981\u734E\u91D1");
+        btnAskForAward.setVisible(false);
         btnAskForAward.setFocusPainted(false);
         btnAskForAward.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
+                askForAwardCount++;
+                switch(askForAwardCount) {
+                case 1 :
+                    JOptionPane.showMessageDialog(null, "很抱歉，此遊戲僅供純娛樂使用。並未實際提供獎金。", "廠商表示 : ", JOptionPane.PLAIN_MESSAGE);
+                    break;
+                case 2 :
+                    JOptionPane.showMessageDialog(null, "什麼!?你說我們騙人?不不不，", "廠商表示 : ", JOptionPane.PLAIN_MESSAGE);
+                    break;
+                case 3 :
+                    JOptionPane.showMessageDialog(null, "很抱歉，此遊戲僅供純娛樂使用。並未實際提供獎金。", "廠商表示 : ", JOptionPane.PLAIN_MESSAGE);
+                    break;
+                default :
+                    JOptionPane.showMessageDialog(null, "很抱歉，此遊戲僅供純娛樂使用。並未實際提供獎金。", "廠商表示 : ", JOptionPane.PLAIN_MESSAGE);
+                }
             }
         });
-        btnAskForAward.setVisible(false);
         btnAskForAward.setForeground(Color.WHITE);
         btnAskForAward.setBackground(Color.RED);
         btnAskForAward.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
@@ -1015,6 +1050,36 @@ public class Lottery extends JFrame
         contentPane.add(panel_Number, BorderLayout.CENTER);
         panel_Number.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
+        BufferedImage bufferedImage = new BufferedImage(230, 350, BufferedImage.TYPE_INT_ARGB); // 建立BufferedImage
+        try
+        {
+            BufferedImage bufImgIn = ImageIO.read(new FileInputStream("images\\LotteryAward.png"));
+            Graphics2D graphics2d = bufferedImage.createGraphics(); // 建立Graphics2D，以便控制匯入的圖片
+            graphics2d.drawImage(bufImgIn, 5, 0, 220, 340, null); // 重新繪製載入的圖片給bufferedImage
+        } catch (FileNotFoundException e1)
+        {
+            e1.printStackTrace();
+        } catch (IOException e1)
+        {
+            e1.printStackTrace();
+        }
+
+        JPanel panel = new JPanel();
+        panel.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null),
+                new BevelBorder(BevelBorder.LOWERED, null, null, null, null)));
+        panel.setSize(new Dimension(230, 350));
+        panel.setPreferredSize(new Dimension(230, 350));
+        contentPane.add(panel, BorderLayout.WEST);
+
+        lblLotteryImage = new JLabel("");
+        lblLotteryImage.setAlignmentX(Component.CENTER_ALIGNMENT);
+        lblLotteryImage.setHorizontalTextPosition(SwingConstants.CENTER);
+        lblLotteryImage.setHorizontalAlignment(SwingConstants.CENTER);
+
+        panel.add(lblLotteryImage);
+
+        lblLotteryImage.setIcon(new ImageIcon(bufferedImage));
+
         for (int i = 1; i <= 49; i++)
         {
             arrayBtn[i - 1] = CreateBtnNum(i);
@@ -1025,6 +1090,128 @@ public class Lottery extends JFrame
         arrayAwardNums = new JLabel[] { lblAwardNum01, lblAwardNum02, lblAwardNum03, lblAwardNum04, lblAwardNum05,
                 lblAwardNum06, lblAwardNum07 };
 
+    }
+
+    // 產生中獎清單
+    protected void CreateAwardList()
+    {
+        String strAwardMessage = ""; // 最後要顯示的訊息
+        String strNumTemp = ""; // 每組對中的號碼暫存器
+        Boolean isAward = false; // 是否有對中號碼
+        Boolean isSpecialNum = false; // 是否有對中特別號
+        Boolean isFirstPrize = false;        
+        int topIndex = 0;   //中最多號碼的index
+        int numCountTemp = 0;   //暫存中了幾個號碼
+        int numCount = 0; // 計算中了幾個號碼
+        Boolean isSpecialTemp = false;  //暫存中最多號碼的那組，是否有特別號
+        
+        for (int i = 0; i < alSelectNum.size(); i++)
+        {
+            // 比對中獎號碼
+            for (JButton jb : hsAwardBtn)
+            {
+                if (alSelectNum.get(i).contains(jb))
+                {
+                    strNumTemp += " " + jb.getName();
+                    isAward = true;
+                    numCount++;
+                }
+            }            
+            // 比對特別號
+            if (numCount>=2 && alSelectNum.get(i).contains(specialNum))
+            {
+                strNumTemp += " 特別號 : " + specialNum.getName();
+                isSpecialNum = true;
+                numCount++;
+            }
+            // 比對完該組號碼，判斷中獎號碼數，並組成字串
+            if (true == isAward && numCount >= 3)
+            {
+                switch (numCount)
+                {
+                case 3:
+                    if (true == isSpecialNum)
+                    {
+                        treemapIndexLevel.put(i, 1);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 柒獎! " + "\r\n        獲得獎金 : NT$" + "400" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    } else
+                    {
+                        treemapIndexLevel.put(i, 1);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 普獎! " + "\r\n        獲得獎金 : NT$" + "400" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    }                    
+                    break;
+                case 4:
+                    if (true == isSpecialNum)
+                    {
+                        treemapIndexLevel.put(i, 1);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 陸獎! " + "\r\n        獲得獎金 : NT$" + "1,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    } else
+                    {
+                        treemapIndexLevel.put(i, 2);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 伍獎! " + "\r\n        獲得獎金 : NT$" + "2,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    }
+                    break;
+                case 5:
+                    if (true == isSpecialNum)
+                    {
+                        treemapIndexLevel.put(i, 2);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 肆獎! " + "\r\n        獲得獎金 : NT$" + "6,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    } else
+                    {
+                        treemapIndexLevel.put(i, 3);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 參獎! " + "\r\n        獲得獎金 : NT$" + "100,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    }
+                    break;
+                case 6:
+                    if (true == isSpecialNum)
+                    {
+                        treemapIndexLevel.put(i, 3);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 貳獎! " + "\r\n        獲得獎金 : NT$" + "300,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                    } else
+                    {
+                        treemapIndexLevel.put(i, 4);
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 頭獎!\r\n        中獎號碼為 : " + strNumTemp + "\r\n";
+                        isFirstPrize=true;
+                    }
+                    break;
+                }
+            }else {
+                strAwardMessage += "第" + (i + 1) + "組的號碼 : 很可惜沒有中獎\r\n";
+            }
+
+            if(numCountTemp<numCount) {
+                numCountTemp=numCount;
+                topIndex = i;
+            }else if(numCountTemp==numCount) {
+                if(isSpecialNum == isSpecialTemp) {
+                    //不須變更
+                }else if( false == isSpecialNum && true == isSpecialTemp) {
+                    //若新中獎組別沒有中特別號，則變更
+                    numCountTemp=numCount;
+                    topIndex = i;
+                    isSpecialTemp=false;
+                }
+            }
+            
+            strNumTemp = "";
+            isAward = false;
+            isSpecialNum = false;
+            numCount = 0;
+        }
+        if(isFirstPrize) {
+            JOptionPane.showMessageDialog(null, "恭喜您對中頭獎!!", "頭獎!!", JOptionPane.INFORMATION_MESSAGE);
+            btnAskForAward.setVisible(true);
+        }
+        if("" == strAwardMessage) {
+            strAwardMessage +="沒有號碼可以對獎...";
+        }
+
+        listSelectNumbers.setSelectedIndex(topIndex);
+        tA_Message.setText(strAwardMessage);
+        JTextArea jtextArea = new JTextArea(strAwardMessage);
+        JScrollPane jscrollPane = new JScrollPane(jtextArea);
+        jscrollPane.setPreferredSize(new Dimension(300, 300));        
+        JOptionPane.showMessageDialog(null, jscrollPane, "對獎結果", JOptionPane.PLAIN_MESSAGE);        
     }
 
     // 重新開始
@@ -1047,12 +1234,14 @@ public class Lottery extends JFrame
         setsCount = 0;
         chargeLevel = 0;
         drawLottery = false;
-        for(JLabel j : arrayMyNums) {
+        for (JLabel j : arrayMyNums)
+        {
             j.setText("");
         }
-        for(JLabel j : arrayAwardNums) {
+        for (JLabel j : arrayAwardNums)
+        {
             j.setText("");
-        }       
+        }
         ChangeAllLblBorderToWhite();
     }
 
@@ -1074,7 +1263,7 @@ public class Lottery extends JFrame
         JButton btnNewButton = new JButton(String.format("%02d", i));
         btnNewButton.setName(String.valueOf(i));
         btnNewButton.setMargin(new Insets(20, 20, 20, 20));
-        btnNewButton.setPreferredSize(new Dimension(95, 50));
+        btnNewButton.setPreferredSize(new Dimension(75, 50));
         btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));
         btnNewButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnNewButton.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
@@ -1152,7 +1341,6 @@ public class Lottery extends JFrame
     // 取得特別號
     protected Integer getSpecialNum(HashSet<JButton> hsAwardBtn)
     {
-        JButton specialNum;
         Boolean isHave = true;
         do
         {
@@ -1167,7 +1355,7 @@ public class Lottery extends JFrame
     }
 
     // SelectJList的號碼比對
-    protected void JListAward()
+    protected void JListAward(int selectIndex)
     {
         ChangeAllLblBorderToWhite();
 
@@ -1186,7 +1374,21 @@ public class Lottery extends JFrame
                                 ChangeLblColorToOrange(arrayAwardNums[i], j2); // 對中特別號
                             } else
                             {
-                                ChangeLblColorToGreen(arrayAwardNums[i], j2); // 對中其他號碼
+                             // 對中其他號碼，根據對中的號碼數變更顏色
+                                switch(treemapIndexLevel.get(selectIndex)) {
+                                case 1 :
+                                    ChangeLblColorToGreen(arrayAwardNums[i], j2); 
+                                    break;
+                                case 2 :
+                                    ChangeLblColorToCYAN(arrayAwardNums[i], j2);
+                                    break;
+                                case 3 :
+                                    ChangeLblColorToMAGENTA(arrayAwardNums[i], j2); 
+                                    break;
+                                case 4 :
+                                    ChangeLblColorToRainbow(arrayAwardNums[i], j2); 
+                                    break;
+                                }                                
                             }
                         }
                     }
@@ -1218,8 +1420,8 @@ public class Lottery extends JFrame
         j2.setForeground(Color.red);
         j2.setBackground(new Color(153, 255, 51));
     }
-    
- // 變更Label外觀顏色:青色
+
+    // 變更Label外觀顏色:青色
     protected void ChangeLblColorToCYAN(JLabel j1, JLabel j2)
     {
         j1.setForeground(Color.red);
@@ -1227,8 +1429,8 @@ public class Lottery extends JFrame
         j2.setForeground(Color.red);
         j2.setBackground(Color.CYAN);
     }
-    
- // 變更Label外觀顏色:洋紅色
+
+    // 變更Label外觀顏色:洋紅色
     protected void ChangeLblColorToMAGENTA(JLabel j1, JLabel j2)
     {
         j1.setForeground(Color.red);
@@ -1236,8 +1438,8 @@ public class Lottery extends JFrame
         j2.setForeground(Color.red);
         j2.setBackground(Color.MAGENTA);
     }
-    
- // 變更Label外觀顏色:綠色
+
+    // 變更Label外觀顏色:綠色
     protected void ChangeLblColorToRainbow(JLabel j1, JLabel j2)
     {
         j1.setForeground(Color.red);
