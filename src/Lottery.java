@@ -1,3 +1,4 @@
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
@@ -42,6 +43,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.JScrollPane;
 import javax.swing.JProgressBar;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.event.MouseAdapter;
@@ -56,6 +58,8 @@ import javax.swing.ImageIcon;
 import java.awt.Point;
 import java.awt.Component;
 import java.awt.Rectangle;
+import java.awt.Shape;
+import java.awt.Stroke;
 
 public class Lottery extends JFrame
 {
@@ -73,7 +77,6 @@ public class Lottery extends JFrame
     private JButton btnClickMe;
     private JButton btnAskForAward;
     private JButton btnAgain;
-    private JLabel lblImageClick;
     private JLabel lblAwardNum01;
     private JLabel lblAwardNum02;
     private JLabel lblAwardNum03;
@@ -112,6 +115,9 @@ public class Lottery extends JFrame
     private int timeLevel1 = 13; // 動畫加速階段
     private int timeLevel2 = 88; // 動畫減速階段
     private int timeLimit = 100; // 動畫最大次數
+    private MyCanvasPaint myPaint;  //彩框動畫繪圖類別
+    private int paintStartX = 0;    //彩框起始X座標
+    private int paintStartY = 0;    //彩框起始Y座標
 
     /**
      * Launch the application.
@@ -189,6 +195,13 @@ public class Lottery extends JFrame
                     }
                     SelectBtnClear(hsMySelectBtn); // 清除選取的號碼
                     spinnerSets.setValue(1);
+                }
+                
+                //有選號碼才能開獎
+                if(!alSelectNum.isEmpty()) {
+                    btnAward.setEnabled(true);
+                }else {
+                    btnAward.setEnabled(false);
                 }
             }
         });
@@ -286,6 +299,13 @@ public class Lottery extends JFrame
                     SelectBtnClear(hsMySelectBtn); // 清除自選的號碼
                 }
                 spinnerSets.setValue(1);
+                
+              //有選號碼才能開獎
+                if(!alSelectNum.isEmpty()) {
+                    btnAward.setEnabled(true);
+                }else {
+                    btnAward.setEnabled(false);
+                }
             }
         });
         btnQuickSelect.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -384,6 +404,7 @@ public class Lottery extends JFrame
         panel_Operation.add(label_11, gbc_label_11);
 
         btnAgain = new JButton("\u518D\u73A9\u4E00\u6B21");
+        btnAgain.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAgain.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
@@ -582,12 +603,15 @@ public class Lottery extends JFrame
         panel_Award.add(lblMyNum06, gbc_lblMyNum06);
 
         btnAward = new JButton("\u958B\u734E");
+        btnAward.setEnabled(false);
+        btnAward.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAward.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
-            {
-                panel_Click.setVisible(true);
+            {                                                
                 SetEnabledToFalse(); // 關閉btn功能
+                SelectBtnClear(hsMySelectBtn);
+                panel_Click.setVisible(true);
                 drawLottery = 1;
             }
         });
@@ -631,20 +655,6 @@ public class Lottery extends JFrame
         gbc_label_27.gridy = 0;
         panel_Click.add(label_27, gbc_label_27);
 
-        lblImageClick = new JLabel("");
-        lblImageClick.setBackground(Color.RED);
-        lblImageClick.setPreferredSize(new Dimension(30, 60));
-        lblImageClick.setMinimumSize(new Dimension(30, 60));
-        lblImageClick.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_lblImageClick = new GridBagConstraints();
-        gbc_lblImageClick.fill = GridBagConstraints.BOTH;
-        gbc_lblImageClick.gridheight = 2;
-        gbc_lblImageClick.gridwidth = 3;
-        gbc_lblImageClick.insets = new Insets(0, 0, 5, 5);
-        gbc_lblImageClick.gridx = 1;
-        gbc_lblImageClick.gridy = 0;
-        panel_Click.add(lblImageClick, gbc_lblImageClick);
-
         JLabel label_32 = new JLabel("");
         label_32.setPreferredSize(new Dimension(30, 30));
         label_32.setMinimumSize(new Dimension(30, 30));
@@ -676,14 +686,17 @@ public class Lottery extends JFrame
         panel_Click.add(label_24, gbc_label_24);
 
         progressBar = new JProgressBar();
+        progressBar.setPreferredSize(new Dimension(50, 14));
+        progressBar.setOrientation(SwingConstants.VERTICAL);
         progressBar.setForeground(Color.RED);
-        progressBar.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+        progressBar.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
         GridBagConstraints gbc_progressBar = new GridBagConstraints();
+        gbc_progressBar.gridheight = 5;
         gbc_progressBar.fill = GridBagConstraints.BOTH;
         gbc_progressBar.gridwidth = 3;
         gbc_progressBar.insets = new Insets(0, 0, 5, 5);
         gbc_progressBar.gridx = 1;
-        gbc_progressBar.gridy = 3;
+        gbc_progressBar.gridy = 0;
         panel_Click.add(progressBar, gbc_progressBar);
 
         JLabel label_30 = new JLabel("");
@@ -696,15 +709,17 @@ public class Lottery extends JFrame
         gbc_label_30.gridy = 4;
         panel_Click.add(label_30, gbc_label_30);
 
-        btnClickMe = new JButton("\u6309\u6211");
+        btnClickMe = new JButton("Click");
+        btnClickMe.setForeground(Color.BLACK);
+        btnClickMe.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnClickMe.setFocusPainted(false);
         GridBagConstraints gbc_btnClickMe = new GridBagConstraints();
         gbc_btnClickMe.insets = new Insets(0, 0, 0, 5);
         gbc_btnClickMe.fill = GridBagConstraints.BOTH;
-        gbc_btnClickMe.gridheight = 3;
+        gbc_btnClickMe.gridheight = 2;
         gbc_btnClickMe.gridwidth = 3;
         gbc_btnClickMe.gridx = 1;
-        gbc_btnClickMe.gridy = 4;
+        gbc_btnClickMe.gridy = 5;
         panel_Click.add(btnClickMe, gbc_btnClickMe);
         btnClickMe.addActionListener(new ActionListener()
         {
@@ -724,7 +739,7 @@ public class Lottery extends JFrame
                                 {
                                     animationBtn = arrayBtn[random.nextInt(49)];
                                     if (hsAnimationBtn.add(animationBtn))
-                                    {                                        
+                                    {
                                         ChangeBtnBorderByChargeLevel(animationBtn);
                                     }
                                 }
@@ -755,8 +770,8 @@ public class Lottery extends JFrame
                                 }
                             }
                             // 動畫跑完後開獎
-                            DrawLottery();
                             drawLottery = 3;
+                            DrawLottery();
                         }
                     });
                     drawLottery = 2;
@@ -1082,6 +1097,7 @@ public class Lottery extends JFrame
         panel_Award.add(label_21, gbc_label_21);
 
         btnAskForAward = new JButton("\u8981\u734E\u91D1");
+        btnAskForAward.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAskForAward.setVisible(false);
         btnAskForAward.setFocusPainted(false);
         btnAskForAward.addActionListener(new ActionListener()
@@ -1106,6 +1122,7 @@ public class Lottery extends JFrame
                     strTitle = "廠商表示 : ";
                     break;
                 default:
+                    myPaint.stopPaintRainBow(0);
                     strMessage = "今日已結束營業...";
                     strTitle = "公告 : ";
                     btnAgain.setEnabled(false);
@@ -1125,6 +1142,7 @@ public class Lottery extends JFrame
                 jtextArea.setFont(new Font(null, 0, 16));
                 jtextArea.setBackground(new Color(240, 240, 240));
                 JOptionPane.showMessageDialog(null, jtextArea, strTitle, JOptionPane.PLAIN_MESSAGE);
+                RePaint();
             }
         });
         btnAskForAward.setForeground(Color.WHITE);
@@ -1175,6 +1193,7 @@ public class Lottery extends JFrame
         contentPane.add(panel_GameImage, BorderLayout.WEST);
 
         lblLotteryImage = new JLabel("");
+        lblLotteryImage.setToolTipText("");
         lblLotteryImage.setAlignmentX(Component.CENTER_ALIGNMENT);
         lblLotteryImage.setHorizontalTextPosition(SwingConstants.CENTER);
         lblLotteryImage.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1188,6 +1207,8 @@ public class Lottery extends JFrame
             arrayBtn[i - 1] = CreateBtnNum(i);
             panel_Number.add(arrayBtn[i - 1]);
         }
+        myPaint = new MyCanvasPaint();
+        panel_Number.add(myPaint);
 
         arrayMyNums = new JLabel[] { lblMyNum01, lblMyNum02, lblMyNum03, lblMyNum04, lblMyNum05, lblMyNum06 };
         arrayAwardNums = new JLabel[] { lblAwardNum01, lblAwardNum02, lblAwardNum03, lblAwardNum04, lblAwardNum05,
@@ -1222,9 +1243,9 @@ public class Lottery extends JFrame
         numbers.add(getSpecialNum(hsAwardBtn)); // 取得並加入特別號
         for (JButton jb : hsAwardBtn)
         {
-            ChangeBtnBorderByChargeLevel(jb);            
+            ChangeBtnBorderByChargeLevel(jb);
         }
-        ChangeBtnBorderByChargeLevel(specialNum);        
+        ChangeBtnBorderByChargeLevel(specialNum);
         // 將開獎號碼放入開獎號碼Label區
         for (int i = 0; i < numbers.size(); i++)
         {
@@ -1319,7 +1340,7 @@ public class Lottery extends JFrame
                     } else
                     {
                         treemapIndexLevel.put(i, 4);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 頭獎!\r\n        中獎號碼為 : " + strNumTemp
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 頭獎!\r\n        中獎號碼 : " + strNumTemp
                                 + "\r\n";
                         isFirstPrize = true;
                     }
@@ -1356,7 +1377,13 @@ public class Lottery extends JFrame
         }
         if (isFirstPrize)
         {
-            JOptionPane.showMessageDialog(null, "恭喜您對中頭獎!!", "頭獎!!", JOptionPane.INFORMATION_MESSAGE);
+            String strTop = "恭喜您對中頭獎!!";
+            JTextArea jtextarea = new JTextArea(strTop);
+            jtextarea.setFont(new Font(null, 0, 26));
+            jtextarea.setForeground(Color.RED);
+            JScrollPane jscrollpane = new JScrollPane(jtextarea);
+            jscrollpane.setPreferredSize(new Dimension(300, 100));
+            JOptionPane.showMessageDialog(null, jscrollpane, "頭獎", JOptionPane.INFORMATION_MESSAGE);
             btnAskForAward.setVisible(true);
         }
         if ("" == strAwardMessage)
@@ -1368,6 +1395,7 @@ public class Lottery extends JFrame
         JListAward(topIndex);
         tA_Message.setText(strAwardMessage);
         JTextArea jtextArea = new JTextArea(strAwardMessage);
+        jtextArea.setFont(new Font(null, 0, 16));
         JScrollPane jscrollPane = new JScrollPane(jtextArea);
         jscrollPane.setPreferredSize(new Dimension(300, 300));
         JOptionPane.showMessageDialog(null, jscrollPane, "對獎結果", JOptionPane.PLAIN_MESSAGE);
@@ -1376,6 +1404,8 @@ public class Lottery extends JFrame
     // 重新開始
     protected void SetEnabledToTrue()
     {
+        chargeLevel = 0;
+        myPaint.stopPaintRainBow(chargeLevel);
         btnAward.setEnabled(true);
         btnSelfSelect.setEnabled(true);
         btnQuickSelect.setEnabled(true);
@@ -1389,7 +1419,6 @@ public class Lottery extends JFrame
         hsAwardBtn.clear();
         alSelectNum.clear();
         setsCount = 0;
-        chargeLevel = 0;
         drawLottery = 0;
         progressBarValue = 0;
         progressBar.setValue(0);
@@ -1401,8 +1430,9 @@ public class Lottery extends JFrame
         times = 0; // 動畫計數器
         timeLevel1 = 13; // 動畫加速階段
         timeLevel2 = 88; // 動畫減速階段
-        timeLimit = 100; // 動畫最大次數
+        timeLimit = 100; // 動畫最大次數                
         btnAskForAward.setVisible(false);
+        btnAward.setEnabled(false);
         for (JButton jb : arrayBtn)
         {
             ChangeBtnBorderToNull(jb);
@@ -1416,6 +1446,14 @@ public class Lottery extends JFrame
             j.setText("");
         }
         ChangeAllLblBorderToWhite();
+        try
+        {
+            Thread.sleep(500);
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+        RePaint();
     }
 
     // 設定btn無法點擊
@@ -1424,10 +1462,6 @@ public class Lottery extends JFrame
         btnAward.setEnabled(false);
         btnSelfSelect.setEnabled(false);
         btnQuickSelect.setEnabled(false);
-//        for (JButton j : arrayBtn)
-//        {
-//            j.setEnabled(false);
-//        }
     }
 
     // 動態產生號碼按鈕
@@ -1446,13 +1480,17 @@ public class Lottery extends JFrame
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                if ((hsMySelectBtn.size() < 6) && (true == hsMySelectBtn.add(btnNewButton)))
+                // 未開獎狀態才能按
+                if (0 == drawLottery)
                 {
-                    ChangeBtnBorderToRed(btnNewButton);
-                } else
-                {
-                    ChangeBtnBorderToNull(btnNewButton);
-                    hsMySelectBtn.remove(btnNewButton);
+                    if ((hsMySelectBtn.size() < 6) && (true == hsMySelectBtn.add(btnNewButton)))
+                    {
+                        ChangeBtnBorderToRed(btnNewButton);
+                    } else
+                    {
+                        ChangeBtnBorderToNull(btnNewButton);
+                        hsMySelectBtn.remove(btnNewButton);
+                    }
                 }
             }
         });
@@ -1631,7 +1669,7 @@ public class Lottery extends JFrame
         j2.setBackground(Color.ORANGE);
     }
 
- // 變更按鈕外觀顏色:紅色
+    // 依據充能階段變更按鈕外觀顏色
     protected void ChangeBtnBorderByChargeLevel(JButton jbtn)
     {
         switch (chargeLevel)
@@ -1649,13 +1687,20 @@ public class Lottery extends JFrame
             ChangeBtnBorderToMAGENTA(jbtn);
             break;
         case 4:
-            ChangeBtnBorderToRainbow(jbtn);
+            if (03 == drawLottery)
+            {
+                ChangeBtnBorderToRainbow(jbtn);
+            } else
+            {
+                ChangeBtnBorderToYellow(jbtn);
+            }
+
             break;
         default:
             ChangeBtnBorderToNull(jbtn);
         }
     }
-    
+
     // 變更按鈕外觀顏色:紅色
     protected void ChangeBtnBorderToRed(JButton jbtn)
     {
@@ -1668,7 +1713,7 @@ public class Lottery extends JFrame
     // 變更按鈕外觀顏色:綠色
     protected void ChangeBtnBorderToGreen(JButton jbtn)
     {
-        jbtn.setForeground(Color.GREEN);
+        jbtn.setForeground(new Color(0, 100, 0));
         jbtn.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.GREEN, Color.GREEN, Color.GREEN, Color.GREEN));
 //      btnNewButton.setBackground(Color.PINK);                   
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
@@ -1677,7 +1722,7 @@ public class Lottery extends JFrame
     // 變更按鈕外觀顏色:青色
     protected void ChangeBtnBorderToCYAN(JButton jbtn)
     {
-        jbtn.setForeground(Color.CYAN);
+        jbtn.setForeground(Color.BLUE);
         jbtn.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN));
 //      btnNewButton.setBackground(Color.PINK);                   
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
@@ -1686,7 +1731,7 @@ public class Lottery extends JFrame
     // 變更按鈕外觀顏色:洋紅色
     protected void ChangeBtnBorderToMAGENTA(JButton jbtn)
     {
-        jbtn.setForeground(Color.MAGENTA);
+        jbtn.setForeground(new Color(128, 0, 128));
         jbtn.setBorder(
                 new BevelBorder(BevelBorder.LOWERED, Color.MAGENTA, Color.MAGENTA, Color.MAGENTA, Color.MAGENTA));
 //      btnNewButton.setBackground(Color.PINK);                   
@@ -1694,12 +1739,20 @@ public class Lottery extends JFrame
     }
 
     // 變更按鈕外觀顏色:彩色
-    protected void ChangeBtnBorderToRainbow(JButton jbtn)
+    protected void ChangeBtnBorderToYellow(JButton jbtn)
     {
-        jbtn.setForeground(Color.YELLOW);
+        jbtn.setForeground(Color.ORANGE);
         jbtn.setBorder(new BevelBorder(BevelBorder.LOWERED, Color.YELLOW, Color.YELLOW, Color.YELLOW, Color.YELLOW));
 //      btnNewButton.setBackground(Color.PINK);                   
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
+    }
+
+    protected void ChangeBtnBorderToRainbow(JButton jbtn)
+    {
+        paintStartX = jbtn.getX() + panel_Number.getX() + 7;    //加上JFram
+        paintStartY = jbtn.getY() + panel_Number.getY() + 30;   ////加上JFram
+        myPaint.paintRainBow(getGraphics(), paintStartX, paintStartY, jbtn.getWidth() + 2, jbtn.getHeight() + 2,
+                chargeLevel);
     }
 
     // 變更按鈕外觀顏色:無
@@ -1711,4 +1764,88 @@ public class Lottery extends JFrame
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 20));  
     }
 
+    // 重設畫面
+    protected void RePaint()
+    {
+        this.repaint();
+    }
+}
+
+//繪圖用類別
+class MyCanvasPaint extends JComponent
+{
+    static int chargeLevel = 0;
+
+    public MyCanvasPaint()
+    {
+    }
+
+    //彩框動畫
+    public void paintRainBow(Graphics g, int x, int y, int width, int height, int chargeLevel)
+    {
+        super.paintComponent(g);
+        this.chargeLevel = chargeLevel;
+        Graphics2D graphics2d = (Graphics2D) g;
+        graphics2d.setStroke(new BasicStroke(2.0f));        
+
+        Thread AnimationRainBowThread = new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                while (4 == MyCanvasPaint.chargeLevel)
+                {
+                    try
+                    {
+                        graphics2d.setColor(Color.BLUE);
+                        graphics2d.drawLine(x, y, x, y + height);
+                        graphics2d.setColor(Color.GREEN);
+                        graphics2d.drawLine(x, y + height, x + width, y + height);
+                        graphics2d.setColor(Color.RED);
+                        graphics2d.drawLine(x + width, y + height, x + width, y);
+                        graphics2d.setColor(Color.MAGENTA);
+                        graphics2d.drawLine(x + width, y, x, y);
+                        Thread.sleep(100);
+                        graphics2d.setColor(Color.MAGENTA);
+                        graphics2d.drawLine(x, y, x, y + height);
+                        graphics2d.setColor(Color.BLUE);
+                        graphics2d.drawLine(x, y + height, x + width, y + height);
+                        graphics2d.setColor(Color.GREEN);
+                        graphics2d.drawLine(x + width, y + height, x + width, y);
+                        graphics2d.setColor(Color.RED);
+                        graphics2d.drawLine(x + width, y, x, y);
+                        Thread.sleep(100);
+                        graphics2d.setColor(Color.RED);
+                        graphics2d.drawLine(x, y, x, y + height);
+                        graphics2d.setColor(Color.MAGENTA);
+                        graphics2d.drawLine(x, y + height, x + width, y + height);
+                        graphics2d.setColor(Color.BLUE);
+                        graphics2d.drawLine(x + width, y + height, x + width, y);
+                        graphics2d.setColor(Color.GREEN);
+                        graphics2d.drawLine(x + width, y, x, y);
+                        Thread.sleep(100);
+                        graphics2d.setColor(Color.GREEN);
+                        graphics2d.drawLine(x, y, x, y + height);
+                        graphics2d.setColor(Color.RED);
+                        graphics2d.drawLine(x, y + height, x + width, y + height);
+                        graphics2d.setColor(Color.MAGENTA);
+                        graphics2d.drawLine(x + width, y + height, x + width, y);
+                        graphics2d.setColor(Color.BLUE);
+                        graphics2d.drawLine(x + width, y, x, y);
+                        Thread.sleep(100);
+                    } catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        AnimationRainBowThread.setPriority(10);
+        AnimationRainBowThread.start();
+    }
+
+    public void stopPaintRainBow(int chargeLevel)
+    {
+        this.chargeLevel = chargeLevel;
+    }
 }
