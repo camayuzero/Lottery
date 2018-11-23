@@ -1453,7 +1453,7 @@ public class Lottery extends JFrame
         {
             e.printStackTrace();
         }
-        RePaint();
+        RePaint();  //重設畫面。清除畫上去的彩框
     }
 
     // 設定btn無法點擊
@@ -1738,7 +1738,7 @@ public class Lottery extends JFrame
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
     }
 
-    // 變更按鈕外觀顏色:彩色
+    // 變更按鈕外觀顏色:黃色
     protected void ChangeBtnBorderToYellow(JButton jbtn)
     {
         jbtn.setForeground(Color.ORANGE);
@@ -1747,12 +1747,13 @@ public class Lottery extends JFrame
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
     }
 
+ // 變更按鈕外觀顏色:彩色
     protected void ChangeBtnBorderToRainbow(JButton jbtn)
     {
-        paintStartX = jbtn.getX() + panel_Number.getX() + 7;    //加上JFram
-        paintStartY = jbtn.getY() + panel_Number.getY() + 30;   ////加上JFram
+        paintStartX = jbtn.getX() + panel_Number.getX() + 7;    //加上調整的誤差值 7
+        paintStartY = jbtn.getY() + panel_Number.getY() + 30;   //加上調整的誤差值 30
         myPaint.paintRainBow(getGraphics(), paintStartX, paintStartY, jbtn.getWidth() + 2, jbtn.getHeight() + 2,
-                chargeLevel);
+                chargeLevel);   //加上調整的誤差值 2
     }
 
     // 變更按鈕外觀顏色:無
@@ -1783,9 +1784,9 @@ class MyCanvasPaint extends JComponent
     //彩框動畫
     public void paintRainBow(Graphics g, int x, int y, int width, int height, int chargeLevel)
     {
-        super.paintComponent(g);
+        super.paintComponent(g);    //自動產生的
         this.chargeLevel = chargeLevel;
-        Graphics2D graphics2d = (Graphics2D) g;
+        Graphics2D graphics2d = (Graphics2D) g; //graphics2d才能畫
         graphics2d.setStroke(new BasicStroke(2.0f));        
 
         Thread AnimationRainBowThread = new Thread(new Runnable()
@@ -1798,13 +1799,13 @@ class MyCanvasPaint extends JComponent
                     try
                     {
                         graphics2d.setColor(Color.BLUE);
-                        graphics2d.drawLine(x, y, x, y + height);
+                        graphics2d.drawLine(x, y, x, y + height);   //由左上到左下畫一直線
                         graphics2d.setColor(Color.GREEN);
-                        graphics2d.drawLine(x, y + height, x + width, y + height);
+                        graphics2d.drawLine(x, y + height, x + width, y + height);  //由左下到右下畫一直線
                         graphics2d.setColor(Color.RED);
-                        graphics2d.drawLine(x + width, y + height, x + width, y);
+                        graphics2d.drawLine(x + width, y + height, x + width, y);   //由右下到右上畫一直線
                         graphics2d.setColor(Color.MAGENTA);
-                        graphics2d.drawLine(x + width, y, x, y);
+                        graphics2d.drawLine(x + width, y, x, y);    //由右上到左上畫一直線
                         Thread.sleep(100);
                         graphics2d.setColor(Color.MAGENTA);
                         graphics2d.drawLine(x, y, x, y + height);
@@ -1844,6 +1845,7 @@ class MyCanvasPaint extends JComponent
         AnimationRainBowThread.start();
     }
 
+    //停止彩框動畫
     public void stopPaintRainBow(int chargeLevel)
     {
         this.chargeLevel = chargeLevel;
