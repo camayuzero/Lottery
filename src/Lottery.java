@@ -30,6 +30,7 @@ import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import javax.swing.JLabel;
 import javax.imageio.ImageIO;
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 
 import javax.swing.border.BevelBorder;
@@ -60,6 +61,10 @@ import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.Stroke;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.JRadioButton;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class Lottery extends JFrame
 {
@@ -91,6 +96,14 @@ public class Lottery extends JFrame
     private JSpinner spinnerSets;
     private JCheckBox cbTheSameQuickSelect;
     private JProgressBar progressBar;
+    private JButton btnShowPanel_SelectLevel;
+    private JPanel panel_SelectLevel;
+    private JRadioButton radiobtnThreeNums;
+    private JRadioButton radiobtnFourNums;
+    private JRadioButton radiobtnFiveNums;
+    private JRadioButton radiobtnSixNums;
+    private JButton btnLevelConfirm;
+    private ButtonGroup buttonGroup;
 
     private JButton[] arrayBtn = new JButton[49]; // 儲存動態產生的號碼btn的陣列
     private JLabel[] arrayMyNums; // 我的選號label陣列
@@ -115,9 +128,9 @@ public class Lottery extends JFrame
     private int timeLevel1 = 13; // 動畫加速階段
     private int timeLevel2 = 88; // 動畫減速階段
     private int timeLimit = 100; // 動畫最大次數
-    private MyCanvasPaint myPaint;  //彩框動畫繪圖類別
-    private int paintStartX = 0;    //彩框起始X座標
-    private int paintStartY = 0;    //彩框起始Y座標
+    private MyCanvasPaint myPaint; // 彩框動畫繪圖類別
+    private int paintStartX = 0; // 彩框起始X座標
+    private int paintStartY = 0; // 彩框起始Y座標
 
     /**
      * Launch the application.
@@ -176,6 +189,7 @@ public class Lottery extends JFrame
         panel_Operation.add(label_12, gbc_label_12);
 
         btnSelfSelect = new JButton("\u81EA\u9078\u78BA\u8A8D");
+        btnSelfSelect.setToolTipText("\u81EA\u5DF1\u90786\u500B\u865F\u78BC\u7684\u53EF\u4EE5\u9EDE\u9019\u88E1");
         btnSelfSelect.setFocusPainted(false);
         btnSelfSelect.addActionListener(new ActionListener()
         {
@@ -196,11 +210,13 @@ public class Lottery extends JFrame
                     SelectBtnClear(hsMySelectBtn); // 清除選取的號碼
                     spinnerSets.setValue(1);
                 }
-                
-                //有選號碼才能開獎
-                if(!alSelectNum.isEmpty()) {
+
+                // 有選號碼才能開獎
+                if (!alSelectNum.isEmpty())
+                {
                     btnAward.setEnabled(true);
-                }else {
+                } else
+                {
                     btnAward.setEnabled(false);
                 }
             }
@@ -257,6 +273,7 @@ public class Lottery extends JFrame
         panel_Operation.add(label_6, gbc_label_6);
 
         btnQuickSelect = new JButton("\u5FEB\u9078");
+        btnQuickSelect.setToolTipText("\u5168\u90E8\u5FEB\u9078\u6216\u90E8\u5206\u5FEB\u9078\u90FD\u53EF\u4EE5");
         btnQuickSelect.setFocusPainted(false);
         btnQuickSelect.addActionListener(new ActionListener()
         {
@@ -299,11 +316,13 @@ public class Lottery extends JFrame
                     SelectBtnClear(hsMySelectBtn); // 清除自選的號碼
                 }
                 spinnerSets.setValue(1);
-                
-              //有選號碼才能開獎
-                if(!alSelectNum.isEmpty()) {
+
+                // 有選號碼才能開獎
+                if (!alSelectNum.isEmpty())
+                {
                     btnAward.setEnabled(true);
-                }else {
+                } else
+                {
                     btnAward.setEnabled(false);
                 }
             }
@@ -341,6 +360,7 @@ public class Lottery extends JFrame
         panel_Operation.add(label_8, gbc_label_8);
 
         cbTheSameQuickSelect = new JCheckBox("\u540C\u865F\u5FEB\u9078");
+        cbTheSameQuickSelect.setToolTipText("\u6709\u591A\u7D44\u6642\uFF0C\u865F\u78BC\u6703\u4E00\u6A23\u3002");
         cbTheSameQuickSelect.setFocusPainted(false);
         cbTheSameQuickSelect.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
         GridBagConstraints gbc_cbTheSameQuickSelect = new GridBagConstraints();
@@ -384,6 +404,7 @@ public class Lottery extends JFrame
         panel_Operation.add(label_10, gbc_label_10);
 
         spinnerSets = new JSpinner();
+        spinnerSets.setToolTipText("\u4E00\u6B21\u6700\u591A1000\u7D44");
         spinnerSets.setModel(new SpinnerNumberModel(1, 1, 1000, 1));
         spinnerSets.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
         GridBagConstraints gbc_spinnerSets = new GridBagConstraints();
@@ -404,6 +425,7 @@ public class Lottery extends JFrame
         panel_Operation.add(label_11, gbc_label_11);
 
         btnAgain = new JButton("\u518D\u73A9\u4E00\u6B21");
+        btnAgain.setToolTipText("\u91CD\u65B0\u958B\u59CB");
         btnAgain.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAgain.addActionListener(new ActionListener()
         {
@@ -602,13 +624,15 @@ public class Lottery extends JFrame
         gbc_lblMyNum06.gridy = 1;
         panel_Award.add(lblMyNum06, gbc_lblMyNum06);
 
-        btnAward = new JButton("\u958B\u734E");
+        btnAward = new JButton("<html><body>\u6E96\u5099<br/>\u958B\u734E</body></html>");
+        btnAward.setToolTipText(
+                "\u9EDE\u6211\u6E96\u5099\u958B\u734E\u3002\u672C\u56DE\u5408\u5C07\u7121\u6CD5\u518D\u7E7C\u7E8C\u9078\u865F\u3002");
         btnAward.setEnabled(false);
         btnAward.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAward.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
-            {                                                
+            {
                 SetEnabledToFalse(); // 關閉btn功能
                 SelectBtnClear(hsMySelectBtn);
                 panel_Click.setVisible(true);
@@ -645,53 +669,24 @@ public class Lottery extends JFrame
         gbl_panel_Click.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         panel_Click.setLayout(gbl_panel_Click);
 
-        JLabel label_27 = new JLabel("");
-        label_27.setPreferredSize(new Dimension(30, 30));
-        label_27.setMinimumSize(new Dimension(30, 30));
-        label_27.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_27 = new GridBagConstraints();
-        gbc_label_27.insets = new Insets(0, 0, 5, 5);
-        gbc_label_27.gridx = 0;
-        gbc_label_27.gridy = 0;
-        panel_Click.add(label_27, gbc_label_27);
-
-        JLabel label_32 = new JLabel("");
-        label_32.setPreferredSize(new Dimension(30, 30));
-        label_32.setMinimumSize(new Dimension(30, 30));
-        label_32.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_32 = new GridBagConstraints();
-        gbc_label_32.insets = new Insets(0, 0, 5, 5);
-        gbc_label_32.gridx = 0;
-        gbc_label_32.gridy = 1;
-        panel_Click.add(label_32, gbc_label_32);
-
-        JLabel label_23 = new JLabel("");
-        label_23.setPreferredSize(new Dimension(30, 30));
-        label_23.setMinimumSize(new Dimension(30, 30));
-        label_23.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_23 = new GridBagConstraints();
-        gbc_label_23.insets = new Insets(0, 0, 5, 5);
-        gbc_label_23.gridx = 0;
-        gbc_label_23.gridy = 2;
-        panel_Click.add(label_23, gbc_label_23);
-
-        JLabel label_24 = new JLabel("");
-        label_24.setPreferredSize(new Dimension(30, 30));
-        label_24.setMinimumSize(new Dimension(30, 30));
-        label_24.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_24 = new GridBagConstraints();
-        gbc_label_24.insets = new Insets(0, 0, 5, 0);
-        gbc_label_24.gridx = 4;
-        gbc_label_24.gridy = 2;
-        panel_Click.add(label_24, gbc_label_24);
+        JLabel label = new JLabel("");
+        label.setPreferredSize(new Dimension(30, 30));
+        label.setMinimumSize(new Dimension(30, 30));
+        label.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label = new GridBagConstraints();
+        gbc_label.insets = new Insets(0, 0, 5, 5);
+        gbc_label.gridx = 0;
+        gbc_label.gridy = 0;
+        panel_Click.add(label, gbc_label);
 
         progressBar = new JProgressBar();
+        progressBar.setToolTipText("\u4E2D\u734E\u7387\u5145\u80FD\u689D");
         progressBar.setPreferredSize(new Dimension(50, 14));
         progressBar.setOrientation(SwingConstants.VERTICAL);
         progressBar.setForeground(Color.RED);
         progressBar.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
         GridBagConstraints gbc_progressBar = new GridBagConstraints();
-        gbc_progressBar.gridheight = 5;
+        gbc_progressBar.gridheight = 4;
         gbc_progressBar.fill = GridBagConstraints.BOTH;
         gbc_progressBar.gridwidth = 3;
         gbc_progressBar.insets = new Insets(0, 0, 5, 5);
@@ -699,32 +694,77 @@ public class Lottery extends JFrame
         gbc_progressBar.gridy = 0;
         panel_Click.add(progressBar, gbc_progressBar);
 
-        JLabel label_30 = new JLabel("");
-        label_30.setPreferredSize(new Dimension(30, 30));
-        label_30.setMinimumSize(new Dimension(30, 30));
-        label_30.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_30 = new GridBagConstraints();
-        gbc_label_30.insets = new Insets(0, 0, 5, 5);
-        gbc_label_30.gridx = 0;
-        gbc_label_30.gridy = 4;
-        panel_Click.add(label_30, gbc_label_30);
+        JLabel label_23 = new JLabel("");
+        label_23.setPreferredSize(new Dimension(30, 30));
+        label_23.setMinimumSize(new Dimension(30, 30));
+        label_23.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_23 = new GridBagConstraints();
+        gbc_label_23.insets = new Insets(0, 0, 5, 0);
+        gbc_label_23.gridx = 4;
+        gbc_label_23.gridy = 0;
+        panel_Click.add(label_23, gbc_label_23);
 
-        btnClickMe = new JButton("Click");
+        JLabel label_24 = new JLabel("");
+        label_24.setPreferredSize(new Dimension(30, 30));
+        label_24.setMinimumSize(new Dimension(30, 30));
+        label_24.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_24 = new GridBagConstraints();
+        gbc_label_24.insets = new Insets(0, 0, 5, 5);
+        gbc_label_24.gridx = 0;
+        gbc_label_24.gridy = 1;
+        panel_Click.add(label_24, gbc_label_24);
+
+        JLabel label_25 = new JLabel("");
+        label_25.setPreferredSize(new Dimension(30, 30));
+        label_25.setMinimumSize(new Dimension(30, 30));
+        label_25.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_25 = new GridBagConstraints();
+        gbc_label_25.insets = new Insets(0, 0, 5, 5);
+        gbc_label_25.gridx = 0;
+        gbc_label_25.gridy = 2;
+        panel_Click.add(label_25, gbc_label_25);
+
+        JLabel label_26 = new JLabel("");
+        label_26.setPreferredSize(new Dimension(30, 30));
+        label_26.setMinimumSize(new Dimension(30, 30));
+        label_26.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_26 = new GridBagConstraints();
+        gbc_label_26.insets = new Insets(0, 0, 5, 5);
+        gbc_label_26.gridx = 0;
+        gbc_label_26.gridy = 3;
+        panel_Click.add(label_26, gbc_label_26);
+
+        JLabel label_27 = new JLabel("");
+        label_27.setPreferredSize(new Dimension(30, 30));
+        label_27.setMinimumSize(new Dimension(30, 30));
+        label_27.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_27 = new GridBagConstraints();
+        gbc_label_27.insets = new Insets(0, 0, 5, 5);
+        gbc_label_27.gridx = 0;
+        gbc_label_27.gridy = 4;
+        panel_Click.add(label_27, gbc_label_27);
+
+        btnClickMe = new JButton("開獎");
+        btnClickMe
+                .setToolTipText("\u958B\u734E\u3002\u7E7C\u7E8C\u6309\u53EF\u4EE5\u589E\u52A0\u4E2D\u734E\u7387\u3002");
         btnClickMe.setForeground(Color.BLACK);
         btnClickMe.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnClickMe.setFocusPainted(false);
         GridBagConstraints gbc_btnClickMe = new GridBagConstraints();
-        gbc_btnClickMe.insets = new Insets(0, 0, 0, 5);
+        gbc_btnClickMe.insets = new Insets(0, 0, 5, 5);
         gbc_btnClickMe.fill = GridBagConstraints.BOTH;
         gbc_btnClickMe.gridheight = 2;
         gbc_btnClickMe.gridwidth = 3;
         gbc_btnClickMe.gridx = 1;
-        gbc_btnClickMe.gridy = 5;
+        gbc_btnClickMe.gridy = 4;
         panel_Click.add(btnClickMe, gbc_btnClickMe);
         btnClickMe.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
+                btnClickMe.setText("<html><body>拼命<br/>按我</body></html>");
+                btnShowPanel_SelectLevel.setVisible(true);
+
                 if (1 == drawLottery)
                 {
                     Thread AnimationThread = new Thread(new Runnable()
@@ -770,6 +810,26 @@ public class Lottery extends JFrame
                                 }
                             }
                             // 動畫跑完後開獎
+                            // 先判斷是否有選必中選項
+                            if (null != buttonGroup.getSelection())
+                            {
+                                // 取得選中的radioButton的ActionCommand的值(String)
+                                switch (buttonGroup.getSelection().getActionCommand())
+                                {
+                                case "3":
+                                    chargeLevel = 1;
+                                    break;
+                                case "4":
+                                    chargeLevel = 2;
+                                    break;
+                                case "5":
+                                    chargeLevel = 3;
+                                    break;
+                                case "6":
+                                    chargeLevel = 4;
+                                    break;
+                                }
+                            }
                             drawLottery = 3;
                             DrawLottery();
                         }
@@ -806,27 +866,46 @@ public class Lottery extends JFrame
                 }
             }
         });
-        btnClickMe.setFont(new Font("微軟正黑體", Font.BOLD, 22));
+        btnClickMe.setFont(new Font("微軟正黑體", Font.BOLD, 20));
 
-        JLabel label_26 = new JLabel("");
-        label_26.setPreferredSize(new Dimension(30, 30));
-        label_26.setMinimumSize(new Dimension(30, 30));
-        label_26.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_26 = new GridBagConstraints();
-        gbc_label_26.insets = new Insets(0, 0, 5, 5);
-        gbc_label_26.gridx = 0;
-        gbc_label_26.gridy = 5;
-        panel_Click.add(label_26, gbc_label_26);
+        JLabel label_30 = new JLabel("");
+        label_30.setPreferredSize(new Dimension(30, 30));
+        label_30.setMinimumSize(new Dimension(30, 30));
+        label_30.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_30 = new GridBagConstraints();
+        gbc_label_30.insets = new Insets(0, 0, 5, 5);
+        gbc_label_30.gridx = 0;
+        gbc_label_30.gridy = 5;
+        panel_Click.add(label_30, gbc_label_30);
 
-        JLabel label_25 = new JLabel("");
-        label_25.setPreferredSize(new Dimension(30, 30));
-        label_25.setMinimumSize(new Dimension(30, 30));
-        label_25.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
-        GridBagConstraints gbc_label_25 = new GridBagConstraints();
-        gbc_label_25.insets = new Insets(0, 0, 0, 5);
-        gbc_label_25.gridx = 0;
-        gbc_label_25.gridy = 6;
-        panel_Click.add(label_25, gbc_label_25);
+        JLabel label_32 = new JLabel("");
+        label_32.setPreferredSize(new Dimension(30, 30));
+        label_32.setMinimumSize(new Dimension(30, 30));
+        label_32.setFont(new Font("微軟正黑體", Font.PLAIN, 20));
+        GridBagConstraints gbc_label_32 = new GridBagConstraints();
+        gbc_label_32.insets = new Insets(0, 0, 0, 5);
+        gbc_label_32.gridx = 0;
+        gbc_label_32.gridy = 6;
+        panel_Click.add(label_32, gbc_label_32);
+
+        btnShowPanel_SelectLevel = new JButton("\u8F15\u9B06\u4E00\u9EDE");
+        btnShowPanel_SelectLevel.setVisible(false);
+        btnShowPanel_SelectLevel.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                panel_Click.setVisible(false);
+                panel_SelectLevel.setVisible(true);
+            }
+        });
+        btnShowPanel_SelectLevel.setToolTipText("\u76F4\u63A5\u9078\u64C7\u4E2D\u5E7E\u78BC");
+        btnShowPanel_SelectLevel.setFont(new Font("微軟正黑體", Font.PLAIN, 12));
+        GridBagConstraints gbc_btnShowPanel_SelectLevel = new GridBagConstraints();
+        gbc_btnShowPanel_SelectLevel.gridwidth = 3;
+        gbc_btnShowPanel_SelectLevel.insets = new Insets(0, 0, 0, 5);
+        gbc_btnShowPanel_SelectLevel.gridx = 1;
+        gbc_btnShowPanel_SelectLevel.gridy = 6;
+        panel_Click.add(btnShowPanel_SelectLevel, gbc_btnShowPanel_SelectLevel);
 
         JLabel label_17 = new JLabel("");
         label_17.setPreferredSize(new Dimension(30, 30));
@@ -1037,6 +1116,95 @@ public class Lottery extends JFrame
         gbc_lblAwardNum07.gridy = 3;
         panel_Award.add(lblAwardNum07, gbc_lblAwardNum07);
 
+        panel_SelectLevel = new JPanel();
+        panel_SelectLevel.setVisible(false);
+        panel_SelectLevel.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null),
+                new BevelBorder(BevelBorder.RAISED, null, null, null, null)));
+        panel_SelectLevel.setFont(new Font("微軟正黑體", Font.PLAIN, 16));
+        GridBagConstraints gbc_panel_SelectLevel = new GridBagConstraints();
+        gbc_panel_SelectLevel.gridheight = 6;
+        gbc_panel_SelectLevel.gridwidth = 3;
+        gbc_panel_SelectLevel.insets = new Insets(0, 0, 5, 5);
+        gbc_panel_SelectLevel.fill = GridBagConstraints.BOTH;
+        gbc_panel_SelectLevel.gridx = 37;
+        gbc_panel_SelectLevel.gridy = 1;
+        panel_Award.add(panel_SelectLevel, gbc_panel_SelectLevel);
+
+        JLabel label_33 = new JLabel("\u5FC5\u4E2D : ");
+        label_33.setForeground(Color.RED);
+        label_33.setFont(new Font("微軟正黑體", Font.BOLD, 16));
+
+        buttonGroup = new ButtonGroup();
+        radiobtnThreeNums = new JRadioButton("\u4E09\u78BC");
+        radiobtnThreeNums.setActionCommand("3");
+        radiobtnThreeNums.setFocusPainted(false);
+        radiobtnThreeNums.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+        buttonGroup.add(radiobtnThreeNums);
+
+        radiobtnFourNums = new JRadioButton("\u56DB\u78BC");
+        radiobtnFourNums.setActionCommand("4");
+        radiobtnFourNums.setFocusPainted(false);
+        radiobtnFourNums.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+        buttonGroup.add(radiobtnFourNums);
+
+        radiobtnFiveNums = new JRadioButton("\u4E94\u78BC");
+        radiobtnFiveNums.setActionCommand("5");
+        radiobtnFiveNums.setFocusPainted(false);
+        radiobtnFiveNums.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+        buttonGroup.add(radiobtnFiveNums);
+
+        radiobtnSixNums = new JRadioButton("\u516D\u78BC");
+        radiobtnSixNums.setActionCommand("6");
+        radiobtnSixNums.setFocusPainted(false);
+        radiobtnSixNums.setFont(new Font("微軟正黑體", Font.PLAIN, 14));
+        buttonGroup.add(radiobtnSixNums);
+
+        btnLevelConfirm = new JButton("\u78BA\u5B9A");
+        btnLevelConfirm.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                panel_SelectLevel.setVisible(false);
+                panel_Click.setVisible(true);
+                btnClickMe.setText("<html><body>不按<br/>也行</body></html>");
+            }
+        });
+        btnLevelConfirm.setFocusPainted(false);
+        btnLevelConfirm.setFont(new Font("微軟正黑體", Font.BOLD, 14));
+        GroupLayout gl_panel_SelectLevel = new GroupLayout(panel_SelectLevel);
+        gl_panel_SelectLevel.setHorizontalGroup(gl_panel_SelectLevel.createParallelGroup(Alignment.TRAILING)
+                .addGroup(gl_panel_SelectLevel.createSequentialGroup().addContainerGap().addGroup(gl_panel_SelectLevel
+                        .createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_panel_SelectLevel.createSequentialGroup().addComponent(label_33).addGap(43))
+                        .addGroup(gl_panel_SelectLevel.createSequentialGroup().addGap(10)
+                                .addComponent(radiobtnThreeNums, GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE)
+                                .addContainerGap())))
+                .addGroup(gl_panel_SelectLevel.createSequentialGroup().addGap(20)
+                        .addComponent(radiobtnFourNums, GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE)
+                        .addContainerGap())
+                .addGroup(gl_panel_SelectLevel.createSequentialGroup().addGap(20)
+                        .addComponent(radiobtnFiveNums, GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE)
+                        .addContainerGap())
+                .addGroup(gl_panel_SelectLevel.createSequentialGroup().addGap(20)
+                        .addComponent(radiobtnSixNums, GroupLayout.DEFAULT_SIZE, 71, Short.MAX_VALUE).addContainerGap())
+                .addGroup(Alignment.LEADING,
+                        gl_panel_SelectLevel.createSequentialGroup().addContainerGap()
+                                .addComponent(btnLevelConfirm, GroupLayout.DEFAULT_SIZE, 77, Short.MAX_VALUE)
+                                .addContainerGap()));
+        gl_panel_SelectLevel.setVerticalGroup(gl_panel_SelectLevel.createParallelGroup(Alignment.LEADING)
+                .addGroup(gl_panel_SelectLevel.createSequentialGroup().addComponent(label_33)
+                        .addPreferredGap(ComponentPlacement.UNRELATED)
+                        .addComponent(radiobtnThreeNums, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(radiobtnFourNums, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(radiobtnFiveNums, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.RELATED)
+                        .addComponent(radiobtnSixNums, GroupLayout.PREFERRED_SIZE, 29, GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(ComponentPlacement.UNRELATED).addComponent(btnLevelConfirm)
+                        .addContainerGap(23, Short.MAX_VALUE)));
+        panel_SelectLevel.setLayout(gl_panel_SelectLevel);
+
         JLabel label_18 = new JLabel("");
         label_18.setPreferredSize(new Dimension(30, 30));
         label_18.setMinimumSize(new Dimension(30, 30));
@@ -1097,6 +1265,7 @@ public class Lottery extends JFrame
         panel_Award.add(label_21, gbc_label_21);
 
         btnAskForAward = new JButton("\u8981\u734E\u91D1");
+        btnAskForAward.setToolTipText("\u982D\u734E\u734E\u91D1\u9EDE\u9019\u88E1!!");
         btnAskForAward.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnAskForAward.setVisible(false);
         btnAskForAward.setFocusPainted(false);
@@ -1185,6 +1354,14 @@ public class Lottery extends JFrame
             e1.printStackTrace();
         }
 
+        for (int i = 1; i <= 49; i++)
+        {
+            arrayBtn[i - 1] = CreateBtnNum(i);
+            panel_Number.add(arrayBtn[i - 1]);
+        }
+        myPaint = new MyCanvasPaint();
+        panel_Number.add(myPaint);
+
         JPanel panel_GameImage = new JPanel();
         panel_GameImage.setBorder(new CompoundBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null),
                 new BevelBorder(BevelBorder.LOWERED, null, null, null, null)));
@@ -1201,14 +1378,6 @@ public class Lottery extends JFrame
         panel_GameImage.add(lblLotteryImage);
 
         lblLotteryImage.setIcon(new ImageIcon(bufferedImage));
-
-        for (int i = 1; i <= 49; i++)
-        {
-            arrayBtn[i - 1] = CreateBtnNum(i);
-            panel_Number.add(arrayBtn[i - 1]);
-        }
-        myPaint = new MyCanvasPaint();
-        panel_Number.add(myPaint);
 
         arrayMyNums = new JLabel[] { lblMyNum01, lblMyNum02, lblMyNum03, lblMyNum04, lblMyNum05, lblMyNum06 };
         arrayAwardNums = new JLabel[] { lblAwardNum01, lblAwardNum02, lblAwardNum03, lblAwardNum04, lblAwardNum05,
@@ -1296,51 +1465,51 @@ public class Lottery extends JFrame
                     if (true == isSpecialNum)
                     {
                         treemapIndexLevel.put(i, 1);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 柒獎! " + "\r\n        獲得獎金 : NT$" + "400"
-                                + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 柒獎! " + "\r\n      獲得獎金 : NT$" + "400"
+                                + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     } else
                     {
                         treemapIndexLevel.put(i, 1);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 普獎! " + "\r\n        獲得獎金 : NT$" + "400"
-                                + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 普獎! " + "\r\n      獲得獎金 : NT$" + "400"
+                                + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     }
                     break;
                 case 4:
                     if (true == isSpecialNum)
                     {
                         treemapIndexLevel.put(i, 1);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 陸獎! " + "\r\n        獲得獎金 : NT$"
-                                + "1,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 陸獎! " + "\r\n      獲得獎金 : NT$" + "1,000"
+                                + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     } else
                     {
                         treemapIndexLevel.put(i, 2);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 伍獎! " + "\r\n        獲得獎金 : NT$"
-                                + "2,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 伍獎! " + "\r\n      獲得獎金 : NT$" + "2,000"
+                                + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     }
                     break;
                 case 5:
                     if (true == isSpecialNum)
                     {
                         treemapIndexLevel.put(i, 2);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 肆獎! " + "\r\n        獲得獎金 : NT$"
-                                + "6,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 肆獎! " + "\r\n      獲得獎金 : NT$" + "6,000"
+                                + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     } else
                     {
                         treemapIndexLevel.put(i, 3);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 參獎! " + "\r\n        獲得獎金 : NT$"
-                                + "100,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 參獎! " + "\r\n      獲得獎金 : NT$"
+                                + "100,000" + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     }
                     break;
                 case 6:
                     if (true == isSpecialNum)
                     {
                         treemapIndexLevel.put(i, 3);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 貳獎! " + "\r\n        獲得獎金 : NT$"
-                                + "300,000" + "元\r\n        中獎號碼 : " + strNumTemp + "\r\n";
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 貳獎! " + "\r\n      獲得獎金 : NT$"
+                                + "300,000" + "元\r\n      中獎號碼 : " + strNumTemp + "\r\n";
                     } else
                     {
                         treemapIndexLevel.put(i, 4);
-                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 頭獎!\r\n        中獎號碼 : " + strNumTemp
+                        strAwardMessage += "第" + (i + 1) + "組的號碼 : 恭喜您對中了" + " 頭獎!\r\n      中獎號碼 : " + strNumTemp
                                 + "\r\n";
                         isFirstPrize = true;
                     }
@@ -1430,9 +1599,13 @@ public class Lottery extends JFrame
         times = 0; // 動畫計數器
         timeLevel1 = 13; // 動畫加速階段
         timeLevel2 = 88; // 動畫減速階段
-        timeLimit = 100; // 動畫最大次數                
+        timeLimit = 100; // 動畫最大次數
         btnAskForAward.setVisible(false);
         btnAward.setEnabled(false);
+        btnClickMe.setText("開獎");
+        btnShowPanel_SelectLevel.setVisible(false);
+        panel_SelectLevel.setVisible(false);
+        buttonGroup.clearSelection(); // 清除選擇的中幾碼radiobutton
         for (JButton jb : arrayBtn)
         {
             ChangeBtnBorderToNull(jb);
@@ -1453,7 +1626,7 @@ public class Lottery extends JFrame
         {
             e.printStackTrace();
         }
-        RePaint();  //重設畫面。清除畫上去的彩框
+        RePaint(); // 重設畫面。清除畫上去的彩框
     }
 
     // 設定btn無法點擊
@@ -1598,7 +1771,7 @@ public class Lottery extends JFrame
                                     ChangeLblColorToMAGENTA(arrayAwardNums[i], j2);
                                     break;
                                 case 4:
-                                    ChangeLblColorToRainbow(arrayAwardNums[i], j2);
+                                    ChangeLblColorToYellow(arrayAwardNums[i], j2);
                                     break;
                                 }
                             }
@@ -1636,27 +1809,27 @@ public class Lottery extends JFrame
     // 變更Label外觀顏色:青色
     protected void ChangeLblColorToCYAN(JLabel j1, JLabel j2)
     {
-        j1.setForeground(Color.red);
+        j1.setForeground(Color.MAGENTA);
         j1.setBackground(Color.CYAN);
-        j2.setForeground(Color.red);
+        j2.setForeground(Color.MAGENTA);
         j2.setBackground(Color.CYAN);
     }
 
     // 變更Label外觀顏色:洋紅色
     protected void ChangeLblColorToMAGENTA(JLabel j1, JLabel j2)
     {
-        j1.setForeground(Color.red);
+        j1.setForeground(Color.WHITE);
         j1.setBackground(Color.MAGENTA);
-        j2.setForeground(Color.red);
+        j2.setForeground(Color.WHITE);
         j2.setBackground(Color.MAGENTA);
     }
 
-    // 變更Label外觀顏色:綠色
-    protected void ChangeLblColorToRainbow(JLabel j1, JLabel j2)
+    // 變更Label外觀顏色:黃色
+    protected void ChangeLblColorToYellow(JLabel j1, JLabel j2)
     {
-        j1.setForeground(Color.red);
+        j1.setForeground(Color.BLUE);
         j1.setBackground(Color.yellow);
-        j2.setForeground(Color.red);
+        j2.setForeground(Color.BLUE);
         j2.setBackground(Color.yellow);
     }
 
@@ -1687,7 +1860,7 @@ public class Lottery extends JFrame
             ChangeBtnBorderToMAGENTA(jbtn);
             break;
         case 4:
-            if (03 == drawLottery)
+            if (3 == drawLottery)
             {
                 ChangeBtnBorderToRainbow(jbtn);
             } else
@@ -1747,13 +1920,13 @@ public class Lottery extends JFrame
 //      btnNewButton.setFont(new Font("微軟正黑體", Font.BOLD, 28));
     }
 
- // 變更按鈕外觀顏色:彩色
+    // 變更按鈕外觀顏色:彩色
     protected void ChangeBtnBorderToRainbow(JButton jbtn)
     {
-        paintStartX = jbtn.getX() + panel_Number.getX() + 7;    //加上調整的誤差值 7
-        paintStartY = jbtn.getY() + panel_Number.getY() + 30;   //加上調整的誤差值 30
+        paintStartX = jbtn.getX() + panel_Number.getX() + 7; // 加上調整的誤差值 7
+        paintStartY = jbtn.getY() + panel_Number.getY() + 30; // 加上調整的誤差值 30
         myPaint.paintRainBow(getGraphics(), paintStartX, paintStartY, jbtn.getWidth() + 2, jbtn.getHeight() + 2,
-                chargeLevel);   //加上調整的誤差值 2
+                chargeLevel); // 加上調整的誤差值 2
     }
 
     // 變更按鈕外觀顏色:無
@@ -1781,13 +1954,13 @@ class MyCanvasPaint extends JComponent
     {
     }
 
-    //彩框動畫
+    // 彩框動畫
     public void paintRainBow(Graphics g, int x, int y, int width, int height, int chargeLevel)
     {
-        super.paintComponent(g);    //自動產生的
+        super.paintComponent(g); // 自動產生的
         this.chargeLevel = chargeLevel;
-        Graphics2D graphics2d = (Graphics2D) g; //graphics2d才能畫
-        graphics2d.setStroke(new BasicStroke(2.0f));        
+        Graphics2D graphics2d = (Graphics2D) g; // graphics2d才能畫
+        graphics2d.setStroke(new BasicStroke(2.0f));
 
         Thread AnimationRainBowThread = new Thread(new Runnable()
         {
@@ -1799,13 +1972,13 @@ class MyCanvasPaint extends JComponent
                     try
                     {
                         graphics2d.setColor(Color.BLUE);
-                        graphics2d.drawLine(x, y, x, y + height);   //由左上到左下畫一直線
+                        graphics2d.drawLine(x, y, x, y + height); // 由左上到左下畫一直線
                         graphics2d.setColor(Color.GREEN);
-                        graphics2d.drawLine(x, y + height, x + width, y + height);  //由左下到右下畫一直線
+                        graphics2d.drawLine(x, y + height, x + width, y + height); // 由左下到右下畫一直線
                         graphics2d.setColor(Color.RED);
-                        graphics2d.drawLine(x + width, y + height, x + width, y);   //由右下到右上畫一直線
+                        graphics2d.drawLine(x + width, y + height, x + width, y); // 由右下到右上畫一直線
                         graphics2d.setColor(Color.MAGENTA);
-                        graphics2d.drawLine(x + width, y, x, y);    //由右上到左上畫一直線
+                        graphics2d.drawLine(x + width, y, x, y); // 由右上到左上畫一直線
                         Thread.sleep(100);
                         graphics2d.setColor(Color.MAGENTA);
                         graphics2d.drawLine(x, y, x, y + height);
@@ -1845,7 +2018,7 @@ class MyCanvasPaint extends JComponent
         AnimationRainBowThread.start();
     }
 
-    //停止彩框動畫
+    // 停止彩框動畫
     public void stopPaintRainBow(int chargeLevel)
     {
         this.chargeLevel = chargeLevel;
