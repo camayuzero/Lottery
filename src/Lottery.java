@@ -807,9 +807,10 @@ public class Lottery extends JFrame
                                 if (times >= timeLevel2)
                                 {
                                     panel_Click.setVisible(false);
+                                    panel_SelectLevel.setVisible(false);
                                 }
                             }
-                            // 動畫跑完後開獎
+                            // 動畫跑完後開獎                            
                             // 先判斷是否有選必中選項
                             if (null != buttonGroup.getSelection())
                             {
